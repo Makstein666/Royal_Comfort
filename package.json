@@ -1,0 +1,11 @@
+{
+  "name": "royal-comfort-fullstack",
+  "version": "1.0.0",
+  "scripts": {
+    "start:all": "concurrently \"npm run start --prefix royal-comfort-server\" \"npm run dev --prefix royal-comfort-client\"",
+    "install:all": "npm install && npm install --prefix royal-comfort-server && npm install --prefix royal-comfort-client"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

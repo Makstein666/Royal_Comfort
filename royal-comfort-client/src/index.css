@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+body {
+  /* Фон страницы: очень светлый, с едва заметным оттенком зеленого/серого */
+  background-color: #f8fafc; 
+  color: #022c22; /* Текст темно-изумрудный, почти черный */
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Скроллбар в стиле Royal */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #022c22;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4af37; /* Золотой бегунок */
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b4942b;
+}

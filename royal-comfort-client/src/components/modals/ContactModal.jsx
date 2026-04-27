@@ -1,0 +1,286 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Phone, User, Clock, CheckCircle, Loader2, Send, MessageCircle } from 'lucide-react';
+
+const ContactModal = ({ isOpen, onClose }) => {
+  const [formState, setFormState] = useState({
+    name: '',
+    phone: '+7',
+    time: 'asap'
+  });
+  const [status, setStatus] = useState('idle'); // idle, loading, success
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState(false);
+
+  // Сброс при открытии
+  useEffect(() => {
+    if (isOpen) {
+      setStatus('idle');
+      setFormState({ name: '', phone: '+7', time: 'asap' });
+      setErrors({});
+      setTouched(false);
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  // --- Форматирование телефона с автопрефиксом +7 ---
+  const formatPhone = (raw) => {
+    const digits = raw.replace(/\D/g, '');
+    let clean = digits;
+    if (clean.startsWith('8')) clean = '7' + clean.slice(1);
+    if (!clean.startsWith('7')) clean = '7' + clean;
+    clean = clean.slice(0, 11);
+
+    let result = '+7';
+    if (clean.length > 1) result += ' (' + clean.slice(1, 4);
+    if (clean.length > 4) result += ') ' + clean.slice(4, 7);
+    if (clean.length > 7) result += '-' + clean.slice(7, 9);
+    if (clean.length > 9) result += '-' + clean.slice(9, 11);
+    return result;
+  };
+
+  const handlePhoneChange = (e) => {
+    const raw = e.target.value;
+    if (!raw.startsWith('+7')) {
+      setFormState({ ...formState, phone: '+7' });
+      return;
+    }
+    setFormState({ ...formState, phone: formatPhone(raw) });
+  };
+
+  // --- Валидация ---
+  const validate = (data) => {
+    const errs = {};
+    if (!data.name || data.name.trim().length < 2) {
+      errs.name = 'Введите ваше имя (минимум 2 символа)';
+    }
+    const digits = data.phone.replace(/\D/g, '');
+    if (digits.length < 11) {
+      errs.phone = 'Введите полный номер телефона (+7 и 10 цифр)';
+    }
+    return errs;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setTouched(true);
+    const errs = validate(formState);
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
+    setStatus('loading');
+    try {
+      const response = await fetch('http://localhost:5000/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'consultation',
+          clientName: formState.name,
+          clientPhone: formState.phone,
+          preferredTime: formState.time,
+          contactMethod: 'phone'
+        })
+      });
+
+      if (response.ok) {
+        setStatus('success');
+        setTimeout(onClose, 3000);
+      } else {
+        alert('Ошибка при отправке заявки. Попробуйте позже.');
+        setStatus('idle');
+      }
+    } catch (error) {
+      console.error('Ошибка сети:', error);
+      alert('Нет соединения с сервером.');
+      setStatus('idle');
+    }
+  };
+
+  const inputClass = (field) =>
+    `w-full bg-white border rounded-xl py-3.5 pl-11 pr-4 text-[#0A2A2A] placeholder:text-gray-400 focus:outline-none focus:ring-1 transition-all text-sm ${
+      touched && errors[field]
+        ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+        : 'border-gray-200 focus:border-[#B88E2F] focus:ring-[#B88E2F]'
+    }`;
+
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+
+        {/* Фон */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-[#0A2A2A]/60 backdrop-blur-sm transition-all"
+        />
+
+        {/* Карточка */}
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.9, opacity: 0, y: 20 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className="relative w-full max-w-md bg-[#FDFBF7] rounded-3xl shadow-2xl overflow-hidden border border-[#B88E2F]/20"
+        >
+          {/* Верхняя полоса */}
+          <div className="h-1.5 w-full bg-gradient-to-r from-[#0A2A2A] via-[#B88E2F] to-[#0A2A2A]"></div>
+
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-gray-400 hover:text-[#B88E2F] transition-colors p-1 rounded-full hover:bg-[#B88E2F]/10 z-10"
+          >
+            <X size={24} />
+          </button>
+
+          <div className="p-8 pt-10">
+            {status === 'success' ? (
+              /* ЭКРАН УСПЕХА */
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-col items-center text-center py-6"
+              >
+                <div className="w-20 h-20 bg-green-100/50 rounded-full flex items-center justify-center mb-6 border border-green-200">
+                  <CheckCircle className="text-green-600 w-10 h-10" />
+                </div>
+                <h3 className="text-2xl font-serif font-bold text-[#0A2A2A] mb-2">Заявка принята</h3>
+                <p className="text-gray-500 text-sm">Наш менеджер свяжется с вами<br />в указанное время.</p>
+              </motion.div>
+            ) : (
+              /* ФОРМА */
+              <>
+                <div className="text-center mb-6">
+                  <p className="text-[#B88E2F] font-bold text-[10px] uppercase tracking-[0.2em] mb-2">Royal Service</p>
+                  <h2 className="text-3xl font-serif font-bold text-[#0A2A2A]">Заказать звонок</h2>
+                  <p className="text-xs text-gray-400 mt-2">
+                    Поля, отмеченные <span className="text-red-500 font-bold">*</span>, обязательны для заполнения
+                  </p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+
+                  {/* Имя */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                      Ваше имя <span className="text-red-500">*</span>
+                    </label>
+                    <div className="group relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#B88E2F] transition-colors">
+                        <User size={18} />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Иван Иванов"
+                        value={formState.name}
+                        onChange={(e) => setFormState({ ...formState, name: e.target.value })}
+                        className={inputClass('name')}
+                      />
+                    </div>
+                    {touched && errors.name && (
+                      <p className="text-red-500 text-xs mt-1 pl-1">{errors.name}</p>
+                    )}
+                  </div>
+
+                  {/* Телефон */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                      Номер телефона <span className="text-red-500">*</span>
+                    </label>
+                    <div className="group relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#B88E2F] transition-colors">
+                        <Phone size={18} />
+                      </div>
+                      <input
+                        type="tel"
+                        placeholder="+7 (___) ___-__-__"
+                        value={formState.phone}
+                        onChange={handlePhoneChange}
+                        className={inputClass('phone')}
+                      />
+                    </div>
+                    {touched && errors.phone && (
+                      <p className="text-red-500 text-xs mt-1 pl-1">{errors.phone}</p>
+                    )}
+                  </div>
+
+                  {/* Время звонка */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                      Удобное время для звонка <span className="text-red-500">*</span>
+                    </label>
+                    <div className="group relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#B88E2F] transition-colors">
+                        <Clock size={18} />
+                      </div>
+                      <select
+                        value={formState.time}
+                        onChange={(e) => setFormState({ ...formState, time: e.target.value })}
+                        className="w-full bg-white border border-gray-200 rounded-xl py-3.5 pl-11 pr-10 text-[#0A2A2A] appearance-none cursor-pointer focus:outline-none focus:border-[#B88E2F] focus:ring-1 focus:ring-[#B88E2F] transition-all text-sm"
+                      >
+                        <option value="asap">Позвонить сейчас</option>
+                        <option value="morning">Утром (09:00 - 12:00)</option>
+                        <option value="afternoon">Днем (12:00 - 18:00)</option>
+                        <option value="evening">Вечером (18:00 - 21:00)</option>
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 1L5 5L9 1" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Кнопка */}
+                  <button
+                    type="submit"
+                    disabled={status === 'loading'}
+                    className="w-full py-4 bg-[#B88E2F] hover:bg-[#A67C22] text-[#0A2A2A] font-bold rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 mt-2 relative overflow-hidden group"
+                  >
+                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                    {status === 'loading'
+                      ? <><Loader2 className="animate-spin" size={18} /><span>Отправка...</span></>
+                      : <span>Жду звонка</span>
+                    }
+                  </button>
+                </form>
+
+                {/* БЛОК МЕССЕНДЖЕРОВ */}
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <p className="text-center text-xs text-gray-400 mb-4 uppercase tracking-widest">
+                    Или напишите нам
+                  </p>
+                  <div className="flex gap-3">
+                    <a
+                      href="https://t.me/John_Kristov"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 py-3 bg-[#0A2A2A] text-[#B88E2F] rounded-xl flex items-center justify-center gap-2 font-bold text-sm hover:bg-[#B88E2F] hover:text-[#0A2A2A] transition-all shadow-md group"
+                    >
+                      <Send size={18} className="group-hover:-translate-y-0.5 transition-transform" />
+                      Telegram
+                    </a>
+
+                    <a
+                      href="https://wa.me/79255204053"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 py-3 bg-[#0A2A2A] text-[#B88E2F] rounded-xl flex items-center justify-center gap-2 font-bold text-sm hover:bg-[#B88E2F] hover:text-[#0A2A2A] transition-all shadow-md group"
+                    >
+                      <MessageCircle size={18} className="group-hover:-translate-y-0.5 transition-transform" />
+                      WhatsApp
+                    </a>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+};
+
+export default ContactModal;
