@@ -1,5 +1,6 @@
 const { Order } = require('../models');
-const { Op } = require('sequelize'); // <--- ВОТ ЭТОЙ СТРОКИ СКОРЕЕ ВСЕГО НЕ БЫЛО
+const { Op } = require('sequelize');
+const { notifyAdminAboutNewOrder } = require('../services/bot');
 
 // Функция генерации ID (RC-ГГММ-СЛУЧАЙНОЕ)
 const generateOrderId = () => {
@@ -38,6 +39,16 @@ exports.createOrder = async (req, res) => {
         });
 
         console.log(`✅ Создан заказ: ${newId}`);
+        
+        // Уведомляем админа
+        notifyAdminAboutNewOrder(newId, {
+            clientName,
+            clientPhone,
+            contactMethod,
+            productName,
+            totalPrice
+        });
+
         res.status(201).json({ success: true, orderId: newId });
 
     } catch (error) {

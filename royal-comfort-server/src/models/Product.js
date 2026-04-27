@@ -27,6 +27,26 @@ const Product = sequelize.define('Product', {
   isFeatured: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  images: {
+    type: DataTypes.TEXT, // JSON string
+    allowNull: true
+  },
+  features: {
+    type: DataTypes.TEXT, // JSON string
+    allowNull: true
+  },
+  specs: {
+    type: DataTypes.TEXT, // JSON string
+    allowNull: true
+  },
+  defaultConfig: {
+    type: DataTypes.TEXT, // JSON string
+    allowNull: true
   }
   // Поле categoryId (связь с категорией) создастся автоматически на Шаге 3
 });

@@ -7,8 +7,9 @@ import ProductCard from "../components/catalog/ProductCard";
 import CategoryCard from "../components/catalog/CategoryCard";
 import ConfiguratorModal from "../components/modals/ConfiguratorModal";
 import ProductDetailsModal from "../components/modals/ProductDetailsModal";
-import ReviewModal from "../components/modals/ReviewModal"; // <--- ИМПОРТИРУЕМ НОВУЮ МОДАЛКУ
+import ReviewModal from "../components/modals/ReviewModal";
 import ReviewsSection from "../components/catalog/ReviewsSection"; 
+import ContactModal from "../components/modals/ContactModal"; // Импорт ContactModal
 
 const Catalog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -19,7 +20,10 @@ const Catalog = () => {
   
   // Состояния для модальных окон
   const [selectedProductForDetails, setSelectedProductForDetails] = useState(null);
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false); // <--- Стейт для отзывов
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  
+  // Состояние для ContactModal (В разработке / Предзаказ)
+  const [contactModalData, setContactModalData] = useState({ isOpen: false, title: '', subtitle: '', productName: '' });
   
   const { openModal, products, categories, isLoading } = useConfigurator();
 
@@ -78,6 +82,15 @@ const Catalog = () => {
   const handleCategoryClick = (categoryId) => {
     setFilters({ ...filters, categories: [categoryId] });
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleComingSoonClick = (category) => {
+    setContactModalData({
+        isOpen: true,
+        title: 'Оставить заявку',
+        subtitle: `Производство направления "${category.name}" находится в разработке. Оставьте контакты, и мы свяжемся с вами для предзаказа.`,
+        productName: `Предзаказ: ${category.name}`
+    });
   };
 
   const handleBackToCategories = () => {
@@ -229,7 +242,12 @@ const Catalog = () => {
 
                 {/* 2. ОСТАЛЬНЫЕ КАРТОЧКИ */}
                 {categories.filter(c => c.id !== 'tub').map(category => (
-                    <CategoryCard key={category.id} category={category} onClick={handleCategoryClick} isComingSoon={false} />
+                    <CategoryCard 
+                        key={category.id} 
+                        category={category} 
+                        onClick={() => category.isActive ? handleCategoryClick(category.id) : handleComingSoonClick(category)} 
+                        isComingSoon={!category.isActive} 
+                    />
                 ))}
             </div>
         ) : (
@@ -314,6 +332,15 @@ const Catalog = () => {
         <ReviewModal 
             isOpen={isReviewModalOpen}
             onClose={() => setIsReviewModalOpen(false)}
+        />
+
+        {/* МОДАЛКА ДЛЯ ПРЕДЗАКАЗА (Неактивные категории) */}
+        <ContactModal 
+            isOpen={contactModalData.isOpen}
+            onClose={() => setContactModalData({ ...contactModalData, isOpen: false })}
+            title={contactModalData.title}
+            subtitle={contactModalData.subtitle}
+            productName={contactModalData.productName}
         />
         
       </div>

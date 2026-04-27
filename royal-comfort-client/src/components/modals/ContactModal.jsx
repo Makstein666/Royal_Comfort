@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Phone, User, Clock, CheckCircle, Loader2, Send, MessageCircle } from 'lucide-react';
 
-const ContactModal = ({ isOpen, onClose }) => {
+const ContactModal = ({ isOpen, onClose, title = "Заказать звонок", subtitle = "", productName = "" }) => {
   const [formState, setFormState] = useState({
     name: '',
     phone: '+7',
@@ -75,11 +75,12 @@ const ContactModal = ({ isOpen, onClose }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: 'consultation',
+          type: productName ? 'order' : 'consultation',
           clientName: formState.name,
           clientPhone: formState.phone,
           preferredTime: formState.time,
-          contactMethod: 'phone'
+          contactMethod: 'phone',
+          productName: productName || 'Общая консультация'
         })
       });
 
@@ -154,8 +155,9 @@ const ContactModal = ({ isOpen, onClose }) => {
               <>
                 <div className="text-center mb-6">
                   <p className="text-[#B88E2F] font-bold text-[10px] uppercase tracking-[0.2em] mb-2">Royal Service</p>
-                  <h2 className="text-3xl font-serif font-bold text-[#0A2A2A]">Заказать звонок</h2>
-                  <p className="text-xs text-gray-400 mt-2">
+                  <h2 className="text-3xl font-serif font-bold text-[#0A2A2A] leading-tight">{title}</h2>
+                  {subtitle && <p className="text-sm text-[#0A2A2A]/80 mt-2 font-medium">{subtitle}</p>}
+                  <p className="text-xs text-gray-400 mt-3">
                     Поля, отмеченные <span className="text-red-500 font-bold">*</span>, обязательны для заполнения
                   </p>
                 </div>

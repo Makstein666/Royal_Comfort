@@ -22,25 +22,46 @@ export const ConfiguratorProvider = ({ children }) => {
   const [activeGift, setActiveGift] = useState(null);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
 
-  const giftOptions = {
+  const [giftOptions, setGiftOptions] = useState({
     tub: { name: 'Набор премиальных масел', price: 0, image: 'https://images.unsplash.com/photo-1608248597279-f99d160bfbc8?q=80&w=200' },
     sauna: { name: 'Банный халат Royal', price: 0, image: 'https://images.unsplash.com/photo-1595345763945-3f33878e474d?q=80&w=200' },
     default: { name: 'Секретный бонус', price: 0, image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=200' }
-  };
+  });
 
-  // --- Загрузка активных категорий из API ---
+  // --- Загрузка активных категорий и товаров из API ---
   useEffect(() => {
     const loadCatalog = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/catalog/categories`);
-        if (!res.ok) throw new Error('Ошибка загрузки каталога');
-        const cats = await res.json();
+        const [catsRes, prodsRes, promoRes] = await Promise.all([
+            fetch(`${API_BASE}/catalog/categories`),
+            fetch(`${API_BASE}/catalog/products`),
+            fetch(`${API_BASE}/catalog/promo`)
+        ]);
+        
+        if (!catsRes.ok) throw new Error('Ошибка загрузки категорий');
+        const cats = await catsRes.json();
         setCategories(cats);
+
+        if (prodsRes.ok) {
+            const prods = await prodsRes.json();
+            setProducts(prods);
+        }
+
+        if (promoRes.ok) {
+            const promos = await promoRes.json();
+            if (promos.length > 0) {
+                const newGifts = { ...giftOptions };
+                promos.forEach(p => {
+                    newGifts[p.categoryId] = { name: p.giftName, price: 0, image: p.giftImage };
+                });
+                setGiftOptions(newGifts);
+            }
+        }
       } catch (err) {
         console.error('Не удалось загрузить каталог из API:', err);
-        // Фолбэк: пустой массив
         setCategories([]);
+        setProducts([]);
       } finally {
         setIsLoading(false);
       }

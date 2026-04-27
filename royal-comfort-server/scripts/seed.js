@@ -105,6 +105,25 @@ const TUB_GROUPS = [
   }
 ];
 
+const PRODUCTS = [
+  {
+    id: 1, categoryId: 'tub', name: 'Сибирский Чан "Классик"', price: 95000,
+    description: 'Идеальный выбор для дачи. Базовая комплектация для комфортного отдыха.',
+    image: 'https://images.unsplash.com/photo-1608248597279-f99d160bfbc8?q=80&w=800',
+    isFeatured: true, isActive: true,
+    features: JSON.stringify(['Вместимость: 4-6 человек', 'Материал: Кедр + Сталь AISI 304']),
+    defaultConfig: JSON.stringify({ tub_size: 'tub_size_medium', tub_material: 'tub_material_food_steel', tub_wood: 'tub_wood_cedar', tub_stove: 'tub_stove_simple' })
+  },
+  {
+    id: 2, categoryId: 'tub', name: 'Сибирский Чан "Премиум"', price: 165000,
+    description: 'Максимальный комфорт с интегрированной печью и премиальной сталью.',
+    image: 'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?q=80&w=800',
+    isFeatured: false, isActive: true,
+    features: JSON.stringify(['Вместимость: 6-8 человек', 'Материал: Мореный дуб + Сталь AISI 316', 'Интегрированная печь']),
+    defaultConfig: JSON.stringify({ tub_size: 'tub_size_large', tub_material: 'tub_material_premium_steel', tub_wood: 'tub_wood_oak', tub_stove: 'tub_stove_integrated' })
+  }
+];
+
 async function seed() {
   try {
     await sequelize.sync({ alter: true });
@@ -123,6 +142,19 @@ async function seed() {
       }
     }
     console.log(`✅ Групп конфигуратора: ${TUB_GROUPS.length}`);
+
+    // Добавляем модели (товары)
+    const { Product } = require('../src/models');
+    for (const prod of PRODUCTS) {
+      const existingProd = await Product.findByPk(prod.id);
+      if (existingProd) {
+         await existingProd.update(prod);
+      } else {
+         await Product.create(prod);
+      }
+    }
+    console.log(`✅ Товаров: ${PRODUCTS.length}`);
+
     console.log('🎉 Seed завершён!');
     process.exit(0);
   } catch (err) {

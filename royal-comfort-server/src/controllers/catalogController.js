@@ -1,12 +1,12 @@
 const { Category, ConfigGroup, ConfigOption, Product } = require('../models');
 
-// GET /api/catalog/categories — все АКТИВНЫЕ категории для сайта
+// GET /api/catalog/categories — все категории для сайта (включая неактивные, чтобы показывать заглушку)
 exports.getActiveCategories = async (req, res) => {
     try {
         const categories = await Category.findAll({
-            where: { isActive: true },
+            // Убрали where: { isActive: true }, чтобы фронт видел все категории
             order: [['sortOrder', 'ASC']],
-            attributes: ['id', 'name', 'image', 'description', 'basePrice', 'discountPercent', 'sortOrder']
+            attributes: ['id', 'name', 'image', 'description', 'basePrice', 'discountPercent', 'sortOrder', 'isActive']
         });
         res.json(categories);
     } catch (err) {
@@ -115,5 +115,76 @@ exports.updateOption = async (req, res) => {
     } catch (err) {
         console.error('Ошибка updateOption:', err);
         res.status(500).json({ message: 'Ошибка сервера' });
+    }
+};
+
+// GET /api/catalog/products — получить товары
+exports.getProducts = async (req, res) => {
+    try {
+        const { categoryId } = req.query;
+        const whereClause = categoryId ? { categoryId, isActive: true } : { isActive: true };
+        
+        const products = await Product.findAll({
+            where: whereClause,
+            order: [['price', 'ASC']]
+        });
+        
+        // Форматируем для клиента (парсинг JSON-полей)
+        const formattedProducts = products.map(p => ({
+            id: p.id,
+            categoryId: p.categoryId,
+            name: p.name,
+            description: p.description,
+            price: p.price,
+            image: p.image,
+            images: p.images ? JSON.parse(p.images) : [],
+            features: p.features ? JSON.parse(p.features) : [],
+            specs: p.specs ? JSON.parse(p.specs) : {},
+            defaultConfig: p.defaultConfig ? JSON.parse(p.defaultConfig) : {}
+        }));
+
+        res.json(formattedProducts);
+    } catch (err) {
+        console.error('Ошибка getProducts:', err);
+        res.status(500).json({ message: 'Ошибка сервера' });
+    }
+};
+
+// GET /api/catalog/reviews — получить отзывы
+exports.getReviews = async (req, res) => {
+    try {
+        // Заглушка, пока не реализуем модель Review полностью (или если она уже есть)
+        // Предполагаем, что модель Review существует в db
+        const { Review } = require('../models');
+        if (!Review) {
+             return res.json([]);
+        }
+
+        const { categoryId } = req.query;
+        const whereClause = categoryId ? { categoryId, isApproved: true } : { isApproved: true };
+
+        const reviews = await Review.findAll({
+            where: whereClause,
+            order: [['createdAt', 'DESC']]
+        });
+        
+        res.json(reviews);
+    } catch (err) {
+        console.error('Ошибка getReviews:', err);
+        // Если таблицы нет, возвращаем пустой массив
+        res.json([]);
+    }
+};
+
+// GET /api/catalog/promo — получить активные промо (подарки)
+exports.getPromoSettings = async (req, res) => {
+    try {
+        const { PromoSettings } = require('../models');
+        if (!PromoSettings) return res.json([]);
+        const promos = await PromoSettings.findAll({ where: { isActive: true } });
+        res.json(promos);
+    } catch (err) {
+        console.error('Ошибка getPromoSettings:', err);
+        res.json([]);
     }
 };

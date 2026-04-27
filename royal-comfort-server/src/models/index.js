@@ -5,6 +5,9 @@ const Review = require('./Review');
 const Order = require('./Order');
 const ConfigGroup = require('./ConfigGroup');
 const ConfigOption = require('./ConfigOption');
+const PromoSettings = require('./PromoSettings');
+const Admin = require('./Admin');
+
 
 // Связи товаров и категорий
 Category.hasMany(Product, { foreignKey: 'categoryId', as: 'products' });
@@ -28,5 +31,7 @@ module.exports = {
   Review,
   Order,
   ConfigGroup,
-  ConfigOption
+  ConfigOption,
+  PromoSettings,
+  Admin
 };

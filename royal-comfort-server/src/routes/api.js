@@ -14,6 +14,9 @@ router.get('/orders/:id', ordersController.getOrderStatus);
 router.get('/catalog/categories', catalogController.getActiveCategories);
 router.get('/catalog/categories/all', catalogController.getAllCategories);
 router.get('/catalog/categories/:id', catalogController.getCategoryWithConfig);
+router.get('/catalog/products', catalogController.getProducts);
+router.get('/catalog/reviews', catalogController.getReviews);
+router.get('/catalog/promo', catalogController.getPromoSettings);
 
 // --- ОБНОВЛЕНИЕ (для бота) ---
 router.put('/catalog/categories/:id', catalogController.updateCategory);

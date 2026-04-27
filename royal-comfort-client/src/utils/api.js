@@ -4,7 +4,7 @@ const API_URL = 'http://localhost:5000/api';
 // 1. Получить все категории
 export const fetchCategories = async () => {
   try {
-    const response = await fetch(`${API_URL}/categories`);
+    const response = await fetch(`${API_URL}/catalog/categories`);
     if (!response.ok) throw new Error('Ошибка сети');
     return await response.json();
   } catch (error) {
@@ -16,7 +16,7 @@ export const fetchCategories = async () => {
 // 2. Получить товары (можно по категории)
 export const fetchProducts = async (categoryId = null) => {
   try {
-    let url = `${API_URL}/products`;
+    let url = `${API_URL}/catalog/products`;
     if (categoryId) {
       url += `?categoryId=${categoryId}`;
     }
@@ -29,10 +29,10 @@ export const fetchProducts = async (categoryId = null) => {
   }
 };
 
-// 3. Получить отзывы (ЭТОЙ ФУНКЦИИ НЕ ХВАТАЛО)
+// 3. Получить отзывы
 export const fetchReviews = async (categoryId = null) => {
     try {
-      let url = `${API_URL}/reviews`;
+      let url = `${API_URL}/catalog/reviews`;
       if (categoryId) {
         url += `?categoryId=${categoryId}`;
       }
