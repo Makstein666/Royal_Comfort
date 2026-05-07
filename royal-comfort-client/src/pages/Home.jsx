@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 // Импорт компонентов
@@ -11,6 +11,7 @@ import ConfiguratorCallout from './Home/components/ConfiguratorCallout';
 import FeaturesGrid from './Home/components/FeaturesGrid';
 
 import ConfiguratorModal from '../components/modals/ConfiguratorModal';
+import CustomProjectModal from '../components/modals/CustomProjectModal';
 
 const Home = () => {
   const { hash } = useLocation();
@@ -25,6 +26,15 @@ const Home = () => {
     }
   }, [hash]);
 
+  // Модал для консультации по неактивным категориям
+  // null = закрыт, string = имя категории
+  const [consultCategoryName, setConsultCategoryName] = useState(null);
+
+  const handleCategoryClick = (category) => {
+    // CategorySection передаёт category объект для неактивных категорий
+    setConsultCategoryName(category.name);
+  };
+
   return (
     <div className="w-full overflow-x-hidden bg-white">
       
@@ -38,22 +48,17 @@ const Home = () => {
       <PromoSection />
 
       {/* 4. Каталог продукции */}
-      {/* Добавил id="catalog" для ссылки "Все товары" */}
       <div id="catalog">
-        <CategorySection />
+        <CategorySection onCategoryClick={handleCategoryClick} />
       </div>
 
       {/* 5. Преимущества (О Бренде) */}
-      {/* Добавил id="about" для ссылки "О бренде" */}
       <div id="about">
         <BrandAdvantages />
       </div>
 
       {/* 6. Сервис и Качество (Доставка, Гарантия) */}
-      {/* Добавил id="service" (сюда ведут "Доставка" и "Гарантия") */}
       <div id="delivery"> 
-         {/* Можно добавить пустой div для якоря гарантии, если нужно точнее, 
-             но обычно ведут на блок целиком */}
          <div id="warranty"></div> 
          <FeaturesGrid />
       </div>
@@ -61,7 +66,15 @@ const Home = () => {
       {/* 7. Призыв к действию */}
       <ConfiguratorCallout />
 
+      {/* МОДАЛЫ — рендерятся на уровне страницы, вне любых stacking context */}
       <ConfiguratorModal />
+
+      {/* Модал консультации для неактивных категорий */}
+      <CustomProjectModal
+        isOpen={consultCategoryName !== null}
+        onClose={() => setConsultCategoryName(null)}
+        categoryName={consultCategoryName}
+      />
       
     </div>
   );

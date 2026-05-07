@@ -1,4 +1,4 @@
-const { Category, ConfigGroup, ConfigOption, Product } = require('../models');
+const { Category, ConfigGroup, ConfigOption, Product, Review } = require('../models');
 
 // GET /api/catalog/categories — все категории для сайта (включая неактивные, чтобы показывать заглушку)
 exports.getActiveCategories = async (req, res) => {
@@ -50,10 +50,13 @@ exports.getCategoryWithConfig = async (req, res) => {
         const formattedGroups = groups.map(g => ({
             id: g.id,
             title: g.title,
+            description: g.description,
             options: g.options.map(o => ({
                 id: o.id,
                 name: o.name,
-                price: o.price
+                price: o.price,
+                description: o.description,
+                image: o.image
             }))
         }));
 
@@ -153,13 +156,6 @@ exports.getProducts = async (req, res) => {
 // GET /api/catalog/reviews — получить отзывы
 exports.getReviews = async (req, res) => {
     try {
-        // Заглушка, пока не реализуем модель Review полностью (или если она уже есть)
-        // Предполагаем, что модель Review существует в db
-        const { Review } = require('../models');
-        if (!Review) {
-             return res.json([]);
-        }
-
         const { categoryId } = req.query;
         const whereClause = categoryId ? { categoryId, isApproved: true } : { isApproved: true };
 
@@ -171,8 +167,68 @@ exports.getReviews = async (req, res) => {
         res.json(reviews);
     } catch (err) {
         console.error('Ошибка getReviews:', err);
-        // Если таблицы нет, возвращаем пустой массив
-        res.json([]);
+        res.status(500).json({ message: 'Ошибка сервера' });
+    }
+};
+
+// POST /api/catalog/reviews — создать отзыв (с валидацией по заказу)
+exports.createReview = async (req, res) => {
+    try {
+        const { orderId, rating, text, images } = req.body;
+        const { Order, Product } = require('../models');
+
+        if (!orderId || !rating || !text) {
+            return res.status(400).json({ message: 'Заполните все обязательные поля' });
+        }
+
+        // Ищем заказ
+        const order = await Order.findByPk(orderId);
+        if (!order) {
+            return res.status(404).json({ message: 'Заказ с таким номером не найден' });
+        }
+
+        // Проверяем, нет ли уже отзыва по этому заказу
+        const existingReview = await Review.findOne({ where: { orderId } });
+        if (existingReview) {
+            return res.status(400).json({ message: 'Отзыв по этому заказу уже оставлен' });
+        }
+
+        // Определяем категорию
+        let categoryId = order.productId; // В Order productId может быть ID категории
+        let productName = order.productName;
+
+        // Если productId указывает на конкретный товар, проверим его категорию
+        // Но обычно в этой системе productId для заказов - это ID категории для индивидуальных 
+        // или ID товара. В Order.js мы видели: productId: id категории или товара
+        
+        // Попробуем найти товар, если это не категория
+        const category = await Category.findByPk(order.productId);
+        if (!category) {
+            // Если это не категория, значит это товар
+            const product = await Product.findByPk(order.productId);
+            if (product) {
+                categoryId = product.categoryId;
+            }
+        } else {
+            categoryId = category.id;
+        }
+
+        const review = await Review.create({
+            author: order.clientName,
+            text,
+            rating,
+            images: images || [],
+            orderId,
+            productName,
+            categoryId,
+            date: new Date().toLocaleDateString('ru-RU'),
+            isApproved: false // На модерацию
+        });
+
+        res.status(201).json({ success: true, review });
+    } catch (err) {
+        console.error('Ошибка createReview:', err);
+        res.status(500).json({ message: 'Ошибка сервера' });
     }
 };
 

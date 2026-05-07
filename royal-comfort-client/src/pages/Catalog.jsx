@@ -9,7 +9,7 @@ import ConfiguratorModal from "../components/modals/ConfiguratorModal";
 import ProductDetailsModal from "../components/modals/ProductDetailsModal";
 import ReviewModal from "../components/modals/ReviewModal";
 import ReviewsSection from "../components/catalog/ReviewsSection"; 
-import ContactModal from "../components/modals/ContactModal"; // Импорт ContactModal
+import CustomProjectModal from "../components/modals/CustomProjectModal";
 
 const Catalog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -21,9 +21,10 @@ const Catalog = () => {
   // Состояния для модальных окон
   const [selectedProductForDetails, setSelectedProductForDetails] = useState(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  
-  // Состояние для ContactModal (В разработке / Предзаказ)
-  const [contactModalData, setContactModalData] = useState({ isOpen: false, title: '', subtitle: '', productName: '' });
+
+  // Модал для кастомного проекта / предзаказа
+  // categoryName = null => "Индивидуальный проект", categoryName = "Бани" => предзаказ для Бань
+  const [customProjectCategory, setCustomProjectCategory] = useState(null); // null = закрыт, string = открыт с именем категории
   
   const { openModal, products, categories, isLoading } = useConfigurator();
 
@@ -80,21 +81,32 @@ const Catalog = () => {
   }, [filteredProducts]);
 
   const handleCategoryClick = (categoryId) => {
+    const cat = categories.find(c => c.id === categoryId);
+    // Если категория активна — открываем её каталог
+    // Если нет (isActive: false) — открываем модал подачи проекта
+    if (cat && !cat.isActive) {
+      setCustomProjectCategory(cat.name);
+      return;
+    }
     setFilters({ ...filters, categories: [categoryId] });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleComingSoonClick = (category) => {
-    setContactModalData({
-        isOpen: true,
-        title: 'Оставить заявку',
-        subtitle: `Производство направления "${category.name}" находится в разработке. Оставьте контакты, и мы свяжемся с вами для предзаказа.`,
-        productName: `Предзаказ: ${category.name}`
+    // Все "скоро" категории → модал подачи проекта для этой категории
+    setCustomProjectCategory(category.name);
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      ...getInitialFilters(),
+      categories: filters.categories.length === 1 ? filters.categories : [], // Сохраняем категорию, если она одна выбрана
+      search: ""
     });
   };
 
   const handleBackToCategories = () => {
-    setFilters({ ...filters, categories: [], search: "" });
+    setFilters({ ...getInitialFilters(), categories: [], search: "" });
   };
 
   const handleQuickOrder = (arg1, arg2, arg3) => { 
@@ -136,7 +148,8 @@ const Catalog = () => {
                 : 'min-h-[350px] shadow-2xl border border-[#B88E2F]/20'
             }
         `}>
-            <div className="absolute inset-0 bg-[#0A2A2A]" /> 
+            <div className="absolute inset-0 bg-[#F5F1E6]" /> 
+            <div className="absolute inset-0 bg-[#0A2A2A]/40 z-[1]" /> 
             
             <div 
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-[4s] group-hover:scale-105"
@@ -170,7 +183,7 @@ const Catalog = () => {
                 )}
                 
                 <h1 className={`font-serif font-medium text-white mb-6 leading-tight drop-shadow-xl
-                    ${isFlagship ? 'text-6xl md:text-8xl' : 'text-5xl md:text-7xl'}
+                    ${isFlagship ? 'text-5xl md:text-7xl' : 'text-4xl md:text-6xl'}
                 `}>
                     {isCategoryView ? (
                         "Сибирские Банные Чаны"
@@ -241,29 +254,60 @@ const Catalog = () => {
                 </div>
 
                 {/* 2. ОСТАЛЬНЫЕ КАРТОЧКИ */}
-                {categories.filter(c => c.id !== 'tub').map(category => (
-                    <CategoryCard 
-                        key={category.id} 
-                        category={category} 
-                        onClick={() => category.isActive ? handleCategoryClick(category.id) : handleComingSoonClick(category)} 
-                        isComingSoon={!category.isActive} 
-                    />
-                ))}
+                {categories.filter(c => c.id !== 'tub').map(category => {
+                    // Карточка "Индивидуальный проект" — без фото, особый стиль
+                    if (category.id === 'custom') return (
+                        <div
+                            key={category.id}
+                            onClick={() => setCustomProjectCategory('')}
+                            className="group relative h-[320px] rounded-[2rem] overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-2 bg-gradient-to-br from-[#0A2A2A] to-[#1a4040] shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(184,142,47,0.3)] border border-[#B88E2F]/30 hover:border-[#B88E2F]"
+                        >
+                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] opacity-10 mix-blend-overlay" />
+                            <div className="absolute top-0 right-0 w-48 h-48 bg-[#B88E2F]/10 rounded-full blur-[80px] pointer-events-none" />
+                            <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#B88E2F]/10 rounded-full blur-[80px] pointer-events-none" />
+                            <div className="absolute inset-0 p-8 flex flex-col justify-end items-start">
+                                <h3 className="text-3xl font-serif font-medium text-white mb-2 leading-tight group-hover:text-[#B88E2F] transition-colors duration-300">
+                                    {category.name}
+                                </h3>
+                                <div className="w-12 h-[2px] bg-[#B88E2F] mb-4 origin-left transition-all duration-300 group-hover:w-full opacity-70" />
+                                <div className="flex justify-between items-center w-full">
+                                    <span className="text-gray-400 text-xs font-medium uppercase tracking-widest opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                        Настроить под себя
+                                    </span>
+                                    <div className="w-10 h-10 rounded-full bg-[#B88E2F]/20 flex items-center justify-center text-[#B88E2F] group-hover:bg-[#B88E2F] group-hover:text-[#051F1F] transition-all duration-300">
+                                        <ArrowUpRight size={18} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                    return (
+                        <CategoryCard
+                            key={category.id}
+                            category={category}
+                            onClick={handleCategoryClick}
+                            isComingSoon={!category.isActive}
+                        />
+                    );
+                })}
             </div>
         ) : (
             <div className="flex flex-col lg:flex-row gap-8 items-start">
                 <div className="hidden lg:block w-80 flex-shrink-0 sticky top-32 transition-all duration-300">
-                    <SidebarFilters filters={filters} setFilters={setFilters} onReset={handleBackToCategories} isOpen={isMobileFiltersOpen} onClose={() => setIsMobileFiltersOpen(false)} />
+                    <SidebarFilters categories={categories} filters={filters} setFilters={setFilters} onReset={handleResetFilters} isOpen={isMobileFiltersOpen} onClose={() => setIsMobileFiltersOpen(false)} />
                 </div>
                 
                 <div className="flex-grow w-full">
-                    <div className="flex justify-between items-center mb-6">
-                         <button onClick={handleBackToCategories} className="flex items-center gap-2 text-gold-500 font-bold hover:text-royal-700 transition-colors">
+                    <div className="flex justify-between items-center mb-8">
+                         <button 
+                            onClick={handleBackToCategories} 
+                            className="flex items-center gap-2 text-[#B88E2F] font-bold hover:text-[#0A2A2A] transition-all bg-white/50 px-4 py-2 rounded-xl border border-[#B88E2F]/20 shadow-sm"
+                        >
                             <ArrowLeft size={20} /> К выбору категорий
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                         {filteredProducts.slice(0, visibleCount).map((product) => (
                             <ProductCard key={product.id} product={product} onQuickOrder={handleQuickOrder} onShowDetails={handleShowDetails} />
                         ))}
@@ -271,7 +315,7 @@ const Catalog = () => {
                         {currentCategoryId && (
                             <div 
                                 onClick={() => handleQuickOrder({ id: 'custom_card', category: currentCategoryId })}
-                                className="group relative bg-gradient-to-br from-[#0A2A2A] to-[#1a3a3a] rounded-[2rem] overflow-hidden cursor-pointer flex flex-col h-full min-h-[450px] items-center justify-center text-center p-8 border-2 border-[#B88E2F] hover:border-[#D4AF37] transition-all duration-500 shadow-[0_0_40px_rgba(184,142,47,0.2)] hover:shadow-[0_0_60px_rgba(184,142,47,0.4)] hover:-translate-y-2"
+                                className="group relative bg-gradient-to-br from-[#0A2A2A] to-[#1a3a3a] rounded-[2rem] overflow-hidden cursor-pointer flex flex-col h-full min-h-[400px] md:min-h-[450px] items-center justify-center text-center p-6 md:p-8 border-2 border-[#B88E2F] hover:border-[#D4AF37] transition-all duration-500 shadow-[0_0_40px_rgba(184,142,47,0.2)] hover:shadow-[0_0_60px_rgba(184,142,47,0.4)] hover:-translate-y-2"
                             >
                                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] opacity-20 mix-blend-overlay"></div>
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-[#B88E2F]/10 rounded-full blur-[100px] pointer-events-none"></div>
@@ -281,12 +325,12 @@ const Catalog = () => {
                                     <Settings size={36} className="text-[#0A2A2A] drop-shadow-sm" strokeWidth={1.5} />
                                 </div>
                                 
-                                <h3 className="relative z-10 text-3xl font-serif font-bold text-white mb-4 leading-tight drop-shadow-md">
+                                <h3 className="relative z-10 text-2xl md:text-3xl font-serif font-bold text-white mb-4 leading-tight drop-shadow-md">
                                     Индивидуальный <br/> 
                                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#B88E2F] to-[#F5F1E6]">проект</span>
                                 </h3>
                                 
-                                <p className="relative z-10 text-[#F5F1E6]/80 text-sm mb-10 leading-relaxed max-w-[240px] font-light">
+                                <p className="relative z-10 text-[#F5F1E6]/80 text-[10px] md:text-sm mb-8 md:mb-10 leading-relaxed max-w-[240px] font-light">
                                     Не нашли подходящего? Создайте уникальную конфигурацию {getCategoryName(currentCategoryId)} с нуля. Точный расчет сделает менеджер.
                                 </p>
                                 
@@ -334,13 +378,13 @@ const Catalog = () => {
             onClose={() => setIsReviewModalOpen(false)}
         />
 
-        {/* МОДАЛКА ДЛЯ ПРЕДЗАКАЗА (Неактивные категории) */}
-        <ContactModal 
-            isOpen={contactModalData.isOpen}
-            onClose={() => setContactModalData({ ...contactModalData, isOpen: false })}
-            title={contactModalData.title}
-            subtitle={contactModalData.subtitle}
-            productName={contactModalData.productName}
+        {/* ЕДИНЫЙ МОДАЛ: Индивидуальный проект / Предзаказ для категории */}
+        {/* customProjectCategory = null → закрыт */}
+        {/* customProjectCategory = 'Бани и сауны' → открыт с контекстом этой категории */}
+        <CustomProjectModal
+            isOpen={customProjectCategory !== null}
+            onClose={() => setCustomProjectCategory(null)}
+            categoryName={customProjectCategory}
         />
         
       </div>

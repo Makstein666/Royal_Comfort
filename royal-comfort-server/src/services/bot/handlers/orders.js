@@ -22,9 +22,12 @@ const setupOrdersHandlers = (bot) => {
             const active = await Order.count({ where: { status: { [Op.notIn]: ['Вручение', 'Отменен'] } } });
             const income = await Order.sum('totalPrice', { where: { status: { [Op.ne]: 'Отменен' }, type: 'order' } }) || 0;
             ctx.reply(`📊 Статистика\n💰 Оборот: ${income.toLocaleString()} ₽\n📝 Всего заявок: ${total}\n⚡️ В работе: ${active}`);
-        } catch (e) {
-            ctx.reply('❌ Ошибка при получении статистики');
-        }
+        } catch (e) { ctx.reply('❌ Ошибка при получении статистики'); }
+    });
+
+    bot.hears(/Поиск/i, async (ctx) => {
+        if (!isAdmin(ctx)) return;
+        ctx.reply('🔍 Введите данные для поиска (Имя, Телефон, Название товара или Цена):', Markup.forceReply());
     });
 
     bot.action('refresh_active', (ctx) => {

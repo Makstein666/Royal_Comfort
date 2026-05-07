@@ -2,8 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- ИСПРАВЛЕННЫЙ ИМПОРТ ---
-import CategoryCard from '../../../components/catalog/CategoryCard'; 
+import CategoryCard from '../../../components/catalog/CategoryCard';
 
 import { ArrowLeft, ArrowRight, MoveRight, Loader2 } from 'lucide-react';
 import { useConfigurator } from '../../../context/ConfiguratorContext';
@@ -13,9 +12,16 @@ import { FreeMode, Mousewheel, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/free-mode';
 
-const CategorySection = () => {
-  const navigate = useNavigate();
+/**
+ * CategorySection — карусель категорий на главной.
+ * Модал вынесен наружу (в Home.jsx) во избежание z-index конфликтов
+ * с дочерними stacking context секциями.
+ * 
+ * @param {function} onCategoryClick — вызывается при клике: (category) => void
+ */
+const CategorySection = ({ onCategoryClick }) => {
   const swiperRef = useRef(null);
+  const navigate = useNavigate();
   
   const { categories, isLoading } = useConfigurator();
   
@@ -24,27 +30,35 @@ const CategorySection = () => {
 
   const sortedCategories = useMemo(() => {
     if (!categories || categories.length === 0) return [];
-    const main = categories.find(c => c.id === 'tub');
-    const others = categories.filter(c => c.id !== 'tub');
-    return main ? [main, ...others] : categories;
+    const filtered = categories.filter(c => c.id !== 'custom');
+    const main = filtered.find(c => c.id === 'tub');
+    const others = filtered.filter(c => c.id !== 'tub');
+    return main ? [main, ...others] : filtered;
   }, [categories]);
 
   const handleCategoryClick = (id) => {
-    navigate(`/catalog?categories=${id}`);
-    window.scrollTo(0, 0);
+    const cat = categories.find(c => c.id === id);
+    if (!cat) return;
+
+    if (cat.isActive) {
+      navigate(`/catalog?categories=${id}`);
+      window.scrollTo(0, 0);
+    } else {
+      // Передаём категорию наверх — Home.jsx откроет модал
+      onCategoryClick && onCategoryClick(cat);
+    }
   };
 
   if (isLoading) {
-      return (
-          <div className="py-32 flex justify-center items-center">
-              <Loader2 className="animate-spin text-[#B88E2F]" size={48} />
-          </div>
-      );
+    return (
+      <div className="py-32 flex justify-center items-center">
+        <Loader2 className="animate-spin text-[#B88E2F]" size={48} />
+      </div>
+    );
   }
 
   return (
-    // Убрали overflow-hidden, чтобы тени и кнопки не обрезались
-    <section className="py-20 bg-white relative z-10 group">
+    <section className="py-20 bg-white group">
        
        <div className="container mx-auto px-4 md:px-8 mb-10 text-center">
           <span className="text-[#B88E2F] font-bold text-xs uppercase tracking-[0.3em] block mb-3">
@@ -55,7 +69,6 @@ const CategorySection = () => {
           </h2>
        </div>
 
-       {/* Обертка для слайдера */}
        <div className="relative container mx-auto px-4 md:px-8">
          
          <Swiper
@@ -83,14 +96,13 @@ const CategorySection = () => {
                <CategoryCard 
                  category={category} 
                  isFeatured={category.id === 'tub'} 
-                 onClick={handleCategoryClick} 
+                 onClick={handleCategoryClick}
+                 isComingSoon={!category.isActive}
                />
              </SwiperSlide>
            ))}
          </Swiper>
 
-         {/* --- КНОПКИ НАВИГАЦИИ (ВИДИМЫЕ) --- */}
-         {/* Слой поверх слайдера для кнопок */}
          <div className="pointer-events-none absolute inset-0 flex items-center justify-between z-20 px-2 lg:-mx-16 top-0">
             <div className="pointer-events-auto">
                <NavButton direction="left" onClick={() => swiperRef.current?.slidePrev()} disabled={isBeginning} />
@@ -100,7 +112,6 @@ const CategorySection = () => {
             </div>
          </div>
 
-         {/* Индикатор для мобилок (если кнопки скрыты или для красоты) */}
          <div className="flex md:hidden justify-center items-center gap-3 mt-8 pointer-events-none opacity-80">
             <span className="text-[#B88E2F] font-bold text-[10px] uppercase tracking-[0.3em] animate-pulse">
                 Листайте
@@ -118,7 +129,6 @@ const CategorySection = () => {
   );
 };
 
-// Стилизованная кнопка (Темная с золотом)
 const NavButton = ({ direction, onClick, disabled }) => {
     return (
         <AnimatePresence>

@@ -18,6 +18,10 @@ const ConfigGroup = sequelize.define('ConfigGroup', {
     allowNull: false
     // Пример: 'Размер чаши'
   },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
   sortOrder: {
     type: DataTypes.INTEGER,
     defaultValue: 0

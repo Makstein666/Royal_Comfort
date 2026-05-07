@@ -3,12 +3,13 @@ const { Markup } = require('telegraf');
 const mainMenuAdmin = Markup.keyboard([
     ['⚡️ В работе', '🗂 История заявок'],
     ['📊 Статистика', '🛍 Каталог'],
-    ['⚙️ Настройки']
+    ['⚙️ Настройки', '🔍 Поиск']
 ]).resize();
 
 const mainMenuClient = Markup.keyboard([
     ['🔍 Проверить статус заказа'],
-    ['📒 Каталог проектов', '📞 Связь с менеджером']
+    ['📒 Каталог проектов', '📞 Связь с менеджером'],
+    ['⭐️ Оставить отзыв']
 ]).resize();
 
 const backToAdminMenu = Markup.keyboard([

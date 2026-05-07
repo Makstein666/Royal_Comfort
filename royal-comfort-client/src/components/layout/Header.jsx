@@ -106,7 +106,7 @@ const Header = () => {
         </div>
 
         {/* 2. ПОИСК (Десктоп) */}
-        <div className="hidden md:block flex-1 max-w-xl mx-8 relative z-[900]" ref={searchRef}>
+        <div className="hidden md:block flex-1 max-w-md lg:max-w-xl mx-4 lg:mx-8 relative z-[900]" ref={searchRef}>
             <form onSubmit={handleSubmitSearch} className="relative">
                 <input 
                     type="text" 
@@ -148,7 +148,7 @@ const Header = () => {
         </div>
 
         {/* 3. МЕНЮ (Десктоп) */}
-        <nav className="hidden lg:flex items-center gap-6 relative z-[1000]">
+        <nav className="hidden lg:flex items-center gap-4 xl:gap-8 relative z-[1000]">
           <span onClick={handleGoToHome} className="text-sm font-medium text-white hover:text-[#B88E2F] cursor-pointer uppercase tracking-wider transition-colors">Главная</span>
           <span onClick={() => navigate('/catalog')} className="text-sm font-medium text-white hover:text-[#B88E2F] cursor-pointer uppercase tracking-wider transition-colors">Каталог</span>
           <span onClick={() => navigate('/tracking')} className="flex items-center gap-2 text-sm font-medium text-white hover:text-[#B88E2F] cursor-pointer uppercase tracking-wider transition-colors">

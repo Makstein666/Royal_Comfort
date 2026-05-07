@@ -4,9 +4,9 @@ import { ArrowUpRight } from "lucide-react";
 const CategoryCard = ({ category, onClick, isComingSoon }) => {
   return (
     <div 
-        onClick={() => !isComingSoon && onClick(category.id)}
-        className={`group relative h-[320px] rounded-[2rem] overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-2
-        ${isComingSoon ? 'opacity-80 cursor-not-allowed grayscale' : 'shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(184,142,47,0.3)]'}
+    onClick={() => onClick(category.id)}
+        className={`group relative h-[320px] rounded-[2rem] overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-2 bg-[#F5F1E6]
+        ${isComingSoon ? 'opacity-90 shadow-md hover:shadow-[0_20px_40px_-15px_rgba(184,142,47,0.2)]' : 'shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(184,142,47,0.3)]'}
         `}
     >
         {/* Картинка с зумом */}
@@ -42,7 +42,7 @@ const CategoryCard = ({ category, onClick, isComingSoon }) => {
             {/* Нижняя строка */}
             <div className="flex justify-between items-center w-full">
                 <span className="text-gray-300 text-xs font-medium uppercase tracking-widest opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-75">
-                    Перейти в каталог
+                    {isComingSoon ? 'Узнать подробнее' : 'Перейти в каталог'}
                 </span>
                 
                 <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white group-hover:bg-[#B88E2F] group-hover:text-[#051F1F] transition-all duration-300">

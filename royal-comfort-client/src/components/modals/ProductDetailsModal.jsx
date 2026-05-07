@@ -7,10 +7,23 @@ const ProductDetailsModal = ({ isOpen, onClose, product, onOrder }) => {
 
   if (!isOpen || !product) return null;
 
-  const details = product.details || {
-      specs: [],
-      colors: [],
-      process: "Информация уточняется.",
+  // Парсим JSON поля, если они строки
+  const parseJSON = (data) => {
+    if (!data) return null;
+    if (typeof data === 'object') return data;
+    try { return JSON.parse(data); } catch (e) { return null; }
+  };
+
+  const productFeatures = parseJSON(product.features) || [];
+  const productSpecs = parseJSON(product.specs) || [];
+
+  const details = {
+      specs: productSpecs.length > 0 ? productSpecs : productFeatures.map(f => ({ label: 'Особенность', value: f })),
+      colors: [
+          { name: 'Лиственница (Натуральный)', hex: '#8B4513' },
+          { name: 'Кедр (Светлый)', hex: '#D2B48C' }
+      ],
+      process: "Наше производство в Челябинске использует только сертифицированную нержавеющую сталь AISI 304/430 и отборную древесину лиственницы или кедра. Сборка осуществляется вручную опытными мастерами с многоэтапным контролем качества сварных швов и герметичности чаши.",
       fullDescription: product.description
   };
 

@@ -27,7 +27,16 @@ const Review = sequelize.define('Review', {
   images: {
     type: DataTypes.JSON, 
     allowNull: true,
-    defaultValue: [] // По умолчанию пустой массив
+    defaultValue: [] 
+  },
+  orderId: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true // Один отзыв на один заказ
+  },
+  productName: {
+    type: DataTypes.STRING,
+    allowNull: true
   },
   isApproved: {
     type: DataTypes.BOOLEAN,

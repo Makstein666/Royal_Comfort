@@ -332,18 +332,17 @@ const ConfiguratorModal = () => {
                 
                 {/* 1. КАТЕГОРИИ (ИСПРАВЛЕННАЯ СЕТКА) */}
                 {!activeCategory && (
-                    <div className="flex flex-wrap justify-center content-center gap-4 w-full h-full">
-                        {categories.map((cat) => (
+                    <div className="grid grid-cols-3 gap-3 w-full content-start">
+                        {categories.filter(c => c.id !== 'custom' && c.isActive).map((cat) => (
                             <div 
                                 key={cat.id} 
                                 onClick={() => openModal(cat.id)} 
-                                // Адаптивная ширина: на мобилках 100%, на планшетах половина, на больших - треть
-                                className="w-full sm:w-[calc(50%-16px)] xl:w-[calc(33.333%-16px)] p-6 border border-[#B88E2F]/10 rounded-2xl hover:border-[#B88E2F] hover:bg-white hover:shadow-lg cursor-pointer transition-all flex flex-col items-center text-center gap-4 group bg-white/50 aspect-[4/3] justify-center"
+                                className="p-3 border border-[#B88E2F]/10 rounded-2xl hover:border-[#B88E2F] hover:bg-white hover:shadow-md cursor-pointer transition-all flex flex-col items-center text-center gap-2 group bg-white/50"
                             >
-                                <div className="w-20 h-20 bg-gray-100 rounded-full bg-cover bg-center shrink-0 shadow-inner group-hover:scale-110 transition-transform duration-500" style={{backgroundImage: `url(${cat.image})`}}></div>
+                                <div className="w-14 h-14 bg-gray-100 rounded-full bg-cover bg-center shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-300" style={{backgroundImage: `url(${cat.image})`}}></div>
                                 <div>
-                                    <h4 className="font-bold text-[#051F1F] group-hover:text-[#B88E2F] transition-colors font-serif text-lg">{cat.name}</h4>
-                                    <div className="w-8 h-1 bg-[#B88E2F]/20 mx-auto mt-2 rounded-full group-hover:w-16 group-hover:bg-[#B88E2F] transition-all"></div>
+                                    <h4 className="font-bold text-[#051F1F] group-hover:text-[#B88E2F] transition-colors font-serif text-sm leading-tight">{cat.name}</h4>
+                                    <div className="w-6 h-0.5 bg-[#B88E2F]/20 mx-auto mt-1.5 rounded-full group-hover:w-10 group-hover:bg-[#B88E2F] transition-all"></div>
                                 </div>
                             </div>
                         ))}
@@ -391,23 +390,73 @@ const ConfiguratorModal = () => {
                             </p>
                         </div>
 
-                        {configData.groups && configData.groups.map((group) => (
-                            <div key={group.id} className="space-y-4">
-                                <h3 className="text-[#051F1F] font-bold text-xs uppercase tracking-wider flex items-center gap-2 pl-1 border-l-2 border-[#B88E2F] h-4 leading-none">{group.title}</h3>
-                                <div className="space-y-3">
-                                    {group.options.map((option) => {
-                                        const isSelected = configuration[group.id] === option.id;
-                                        const isDisabled = !!checkCompatibility(group.id, option.id);
-                                        return (
-                                            <div key={option.id} onClick={() => !isDisabled && updateOption(group.id, option.id)} className={`relative p-4 rounded-xl border transition-all cursor-pointer flex justify-between items-center ${isDisabled ? 'opacity-50' : isSelected ? 'border-[#B88E2F] bg-[#B88E2F]/5' : 'border-gray-200 bg-white hover:border-[#B88E2F]/50'}`}>
-                                                <div><span className={`font-medium text-sm ${isSelected ? 'text-[#051F1F]' : 'text-gray-600'}`}>{option.name}</span><span className="text-xs text-gray-400 block">{option.price === 0 ? 'В базе' : `+ ${option.price.toLocaleString()} ₽`}</span></div>
-                                                {isSelected && <div className="w-6 h-6 rounded-full bg-[#B88E2F] flex items-center justify-center"><Check size={14} className="text-white" /></div>}
-                                            </div>
-                                        );
-                                    })}
+                        {configData.groups && configData.groups.map((group) => {
+                            // Логика блокировки: если выбран товар из каталога, нельзя менять размер
+                            const isLocked = group.id === 'tub_size' && !!currentProduct;
+                            
+                            return (
+                                <div key={group.id} className="space-y-4">
+                                    <div className="flex justify-between items-center pr-2">
+                                        <h3 className="text-[#051F1F] font-bold text-xs uppercase tracking-wider flex items-center gap-2 pl-1 border-l-2 border-[#B88E2F] h-4 leading-none">
+                                            {group.title}
+                                        </h3>
+                                        {isLocked && (
+                                            <span className="flex items-center gap-1 text-[9px] font-bold text-[#B88E2F] bg-[#B88E2F]/10 px-2 py-0.5 rounded uppercase">
+                                                <AlertCircle size={10}/> Фиксировано для модели
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="space-y-3">
+                                        {group.options.map((option) => {
+                                            const isSelected = configuration[group.id] === option.id;
+                                            const isDisabled = isLocked && !isSelected;
+                                            
+                                            return (
+                                                <div 
+                                                    key={option.id} 
+                                                    onClick={() => !isDisabled && updateOption(group.id, option.id)} 
+                                                    className={`relative p-4 rounded-xl border transition-all cursor-pointer flex justify-between items-center group/opt
+                                                        ${isDisabled ? 'opacity-30 grayscale cursor-not-allowed' : 
+                                                          isSelected ? 'border-[#B88E2F] bg-[#B88E2F]/5' : 
+                                                          'border-gray-200 bg-white hover:border-[#B88E2F]/50'}`}
+                                                >
+                                                    <div className="flex-1 flex items-center gap-4 pr-4">
+                                                        {option.image && (
+                                                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-lg bg-gray-100 bg-cover bg-center shrink-0 border border-gray-200 group-hover/opt:border-[#B88E2F]/30 overflow-hidden" style={{ backgroundImage: `url(${option.image})` }}>
+                                                                <div className="w-full h-full bg-black/0 group-hover/opt:bg-black/10 transition-colors"></div>
+                                                            </div>
+                                                        )}
+                                                        <div>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className={`font-medium text-sm ${isSelected ? 'text-[#051F1F]' : 'text-gray-600'}`}>
+                                                                    {option.name}
+                                                                </span>
+                                                                {option.description && (
+                                                                    <div className="relative group/info">
+                                                                        <Info size={12} className="text-gray-300 group-hover/info:text-[#B88E2F] cursor-help" />
+                                                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-[#051F1F] text-white text-[10px] rounded shadow-xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-50">
+                                                                            {option.description}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <span className="text-xs text-gray-400 block mt-0.5">
+                                                                {option.price === 0 ? 'В базе' : `+ ${option.price.toLocaleString()} ₽`}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    {isSelected && (
+                                                        <div className="w-6 h-6 rounded-full bg-[#B88E2F] flex items-center justify-center shrink-0">
+                                                            <Check size={14} className="text-white" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
 
                         {activeGift && (
                             <div className="relative overflow-hidden rounded-2xl bg-[#0A2A2A] text-white p-6 shadow-xl border border-[#B88E2F]/30 mt-6">

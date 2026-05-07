@@ -23,6 +23,14 @@ const ConfigOption = sequelize.define('ConfigOption', {
     defaultValue: 0
     // Надбавка к базовой цене (0 = входит в базу)
   },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  image: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
   sortOrder: {
     type: DataTypes.INTEGER,
     defaultValue: 0

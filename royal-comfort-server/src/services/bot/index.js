@@ -1,4 +1,4 @@
-const { Telegraf, session, Scenes } = require('telegraf');
+const { Telegraf, session, Scenes, Markup } = require('telegraf');
 const { Category, ConfigOption, Admin } = require('../../models');
 const { isAdmin, addAdminToCache } = require('./utils/constants');
 
@@ -10,6 +10,7 @@ const { setupAdminHandlers } = require('./handlers/admin');
 const { addProductScene } = require('./scenes/addProduct');
 const { addOptionScene } = require('./scenes/addOption');
 const { addPromoScene } = require('./scenes/addPromo');
+const { addReviewScene } = require('./scenes/addReview');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 if (!BOT_TOKEN) {
@@ -20,7 +21,7 @@ if (!BOT_TOKEN) {
 const bot = new Telegraf(BOT_TOKEN);
 
 // Сцены
-const stage = new Scenes.Stage([addProductScene, addOptionScene, addPromoScene]);
+const stage = new Scenes.Stage([addProductScene, addOptionScene, addPromoScene, addReviewScene]);
 bot.use(session());
 bot.use(stage.middleware());
 
@@ -68,6 +69,7 @@ bot.command('admin_login', async (ctx) => {
 // Настройка модульных обработчиков
 setupOrdersHandlers(bot);
 setupCatalogHandlers(bot);
+if (setupCatalogHandlers.extra) setupCatalogHandlers.extra(bot);
 setupAdminHandlers(bot);
 
 
@@ -81,7 +83,11 @@ bot.hears(/Каталог проектов/i, (ctx) => {
 });
 
 bot.hears(/Проверить статус заказа/i, (ctx) => {
-    ctx.reply('🔍 Пожалуйста, введите номер вашего заказа (например, RC-2405-A1B2):');
+    ctx.reply('🔍 Пожалуйста, введите номер вашего заказа (например, RC-2605-1234):');
+});
+
+bot.hears(/Оставить отзыв/i, (ctx) => {
+    ctx.scene.enter('ADD_REVIEW_SCENE');
 });
 
 // Обработка текстового ввода (для pendingActions)
@@ -118,6 +124,40 @@ bot.on('text', async (ctx) => {
             await ConfigOption.update({ price: val }, { where: { id: state.optId } });
             pendingActions.delete(userId);
             return ctx.reply(`✅ Новая цена надбавки установлена: ${val.toLocaleString()} ₽`, backToCatalogInline);
+        }
+    }
+
+    // Обработка ПОИСКА для админов
+    if (isAdmin(ctx) && ctx.message.reply_to_message && ctx.message.reply_to_message.text.includes('Введите данные для поиска')) {
+        const { Order } = require('../../models');
+        const { Op } = require('sequelize');
+        const query = ctx.message.text;
+        
+        try {
+            const orders = await Order.findAll({
+                where: {
+                    [Op.or]: [
+                        { id: { [Op.like]: `%${query}%` } },
+                        { clientName: { [Op.like]: `%${query}%` } },
+                        { clientPhone: { [Op.like]: `%${query}%` } },
+                        { productName: { [Op.like]: `%${query}%` } },
+                        { totalPrice: isNaN(parseInt(query)) ? -1 : parseInt(query) }
+                    ]
+                },
+                limit: 5
+            });
+
+            if (orders.length === 0) return ctx.reply('❌ Ничего не найдено.');
+
+            for (const o of orders) {
+                const info = `🆔 ${o.id}\n👤 ${o.clientName}\n📞 ${o.clientPhone}\n📦 ${o.productName}\n💰 ${o.totalPrice} ₽\n📍 Статус: ${o.status}`;
+                await ctx.reply(info, Markup.inlineKeyboard([
+                    [Markup.button.callback('Управлять', `manage_${o.id}`)]
+                ]));
+            }
+        } catch (e) {
+            console.error(e);
+            ctx.reply('❌ Ошибка при поиске.');
         }
     }
 });

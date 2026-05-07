@@ -27,28 +27,29 @@ const ProductCard = ({ product, onQuickOrder, onShowDetails }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      className="group relative bg-[#FDFBF7] rounded-[2rem] overflow-hidden shadow-[0_10px_30px_-10px_rgba(184,142,47,0.2)] hover:shadow-[0_25px_60px_-15px_rgba(184,142,47,0.3)] transition-all duration-500 flex flex-col h-full border border-[#B88E2F]/30 hover:border-[#B88E2F]/60 hover:-translate-y-2"
+      transition={{ duration: 0.4 }}
+      className="group relative bg-white rounded-[2rem] overflow-hidden shadow-[0_8px_24px_-8px_rgba(0,0,0,0.12)] hover:shadow-[0_20px_48px_-12px_rgba(184,142,47,0.28)] transition-shadow duration-400 flex flex-col h-full border border-[#B88E2F]/20 hover:border-[#B88E2F]/50"
     >
-      <div className="relative h-[340px] overflow-hidden bg-[#F5F1E6] cursor-pointer relative" onClick={handleDetailsClick}>
-        <div className="absolute inset-0 border-b border-[#B88E2F]/20 z-20 pointer-events-none"></div>
-        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#0A2A2A]/30 to-transparent z-10" />
+      <div className="relative h-[340px] overflow-hidden bg-white cursor-pointer" onClick={handleDetailsClick}>
+        <div className="absolute inset-0 border-b border-[#B88E2F]/15 z-20 pointer-events-none"></div>
 
+        {/* Фото с начальным приближением 110% чтобы края рендера не были видны */}
         <div
-          className="w-full h-full bg-cover bg-center transform group-hover:scale-110 transition-transform duration-1000 ease-out"
+          className="w-full h-full bg-cover bg-center scale-110 group-hover:scale-125 transition-transform duration-700 ease-out"
           style={{ backgroundImage: `url(${product.image})` }}
         />
         
-        <div className="absolute inset-0 bg-[#0A2A2A]/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-[3px]" />
+        <div className="absolute inset-0 bg-[#0A2A2A]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
         
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-8 group-hover:translate-y-0 scale-90 group-hover:scale-100 z-30">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-30">
              <button
                 onClick={handleDetailsClick}
-                className="w-16 h-16 bg-gradient-to-br from-[#B88E2F] to-[#D4AF37] rounded-full flex items-center justify-center text-[#0A2A2A] shadow-[0_0_20px_rgba(184,142,47,0.5)] hover:scale-105 transition-all duration-300 border-2 border-white/20"
+                className="w-14 h-14 bg-gradient-to-br from-[#B88E2F] to-[#D4AF37] rounded-full flex items-center justify-center text-[#0A2A2A] shadow-lg"
              >
-                 <ArrowUpRight size={28} strokeWidth={1.5} />
+                 <ArrowUpRight size={24} strokeWidth={1.5} />
              </button>
         </div>
       </div>
@@ -60,7 +61,7 @@ const ProductCard = ({ product, onQuickOrder, onShowDetails }) => {
             </span>
         </div>
 
-        <h3 className="text-3xl font-serif font-medium text-[#0A2A2A] mb-4 leading-snug cursor-pointer group-hover:text-[#B88E2F] transition-colors duration-300 drop-shadow-sm" onClick={handleDetailsClick}>
+        <h3 className="text-xl md:text-2xl font-serif font-bold text-[#0A2A2A] mb-3 leading-tight cursor-pointer group-hover:text-[#B88E2F] transition-colors duration-300 drop-shadow-sm" onClick={handleDetailsClick}>
           {product.name}
         </h3>
 
@@ -75,7 +76,7 @@ const ProductCard = ({ product, onQuickOrder, onShowDetails }) => {
             <span className="text-[9px] text-gray-400 uppercase tracking-widest mb-1 font-medium flex items-center gap-1">
                 <Info size={10} className="text-[#B88E2F]" /> Ориентировочно
             </span>
-            <span className="text-xl font-serif font-bold text-[#0A2A2A]">
+            <span className="text-xl font-serif font-bold text-[#0A2A2A] whitespace-nowrap">
               от {product.price.toLocaleString()} ₽
             </span>
             <span className="text-[8px] text-gray-400 mt-1 leading-tight max-w-[100px]">
@@ -85,7 +86,7 @@ const ProductCard = ({ product, onQuickOrder, onShowDetails }) => {
 
           <button
             onClick={handleOrderClick}
-            className="group/btn relative overflow-hidden px-6 py-4 rounded-xl bg-[#0A2A2A] text-white font-bold text-[10px] tracking-widest uppercase hover:bg-gradient-to-r hover:from-[#B88E2F] hover:to-[#D4AF37] hover:text-[#0A2A2A] transition-all duration-300 shadow-lg hover:shadow-[0_10px_20px_-5px_rgba(184,142,47,0.5)] flex items-center gap-2"
+            className="group/btn relative overflow-hidden px-4 py-3 md:px-6 md:py-4 rounded-xl bg-[#0A2A2A] text-white font-bold text-[9px] md:text-[10px] tracking-widest uppercase hover:bg-[#B88E2F] hover:text-[#0A2A2A] transition-all duration-300 shadow-lg flex items-center gap-2 flex-shrink-0"
           >
             <span className="relative z-10">Рассчитать</span>
             <ChevronRight size={14} className="relative z-10 group-hover/btn:translate-x-1 transition-transform" />

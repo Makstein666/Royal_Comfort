@@ -170,9 +170,89 @@ async function showCategoryMenu(ctx, catId) {
         [Markup.button.callback('✏️ Изменить базовую цену', `edit_price_${catId}`)],
         [Markup.button.callback('🏷 Установить скидку', `edit_discount_${catId}`)],
         [Markup.button.callback('🔧 Опции конфигуратора', `cat_opts_${catId}`)],
+        [Markup.button.callback('📦 Список товаров', `cat_prods_${catId}`)],
         [Markup.button.callback(toggleLabel, `toggle_cat_${catId}`)],
         [Markup.button.callback('🔙 К каталогу', 'catalog_menu')]
     ]));
 }
+
+// ДОБАВЛЯЕМ ОБРАБОТЧИКИ ДЛЯ ТОВАРОВ
+const { Product } = require('../../../models');
+
+setupCatalogHandlers.extra = (bot) => {
+    bot.action(/cat_prods_(.+)/, async (ctx) => {
+        const catId = ctx.match[1];
+        const products = await Product.findAll({ where: { categoryId: catId } });
+        
+        if (products.length === 0) {
+            return ctx.editMessageText('📭 В этой категории пока нет товаров.', Markup.inlineKeyboard([
+                [Markup.button.callback('➕ Добавить товар', 'add_product_start')],
+                [Markup.button.callback('🔙 Назад', `cat_${catId}`)]
+            ]));
+        }
+
+        const buttons = products.map(p => {
+            const icon = p.isActive ? '🟢' : '🔴';
+            return [Markup.button.callback(`${icon} ${p.name}`, `manage_prod_${p.id}`)];
+        });
+        buttons.push([Markup.button.callback('🔙 Назад', `cat_${catId}`)]);
+
+        await ctx.editMessageText(`📦 ТОВАРЫ КАТЕГОРИИ`, Markup.inlineKeyboard(buttons));
+    });
+
+    bot.action(/manage_prod_(.+)/, async (ctx) => {
+        const prodId = ctx.match[1];
+        const product = await Product.findByPk(prodId);
+        if (!product) return ctx.answerCbQuery('Не найден');
+
+        const statusText = product.isActive ? '✅ Активен' : '🔴 Скрыт';
+        const text = `📦 ${product.name}\n💰 Цена: ${product.price.toLocaleString()} ₽\n📊 Статус: ${statusText}`;
+
+        const toggleLabel = product.isActive ? '🔴 Скрыть' : '🟢 Показать';
+
+        await ctx.editMessageText(text, Markup.inlineKeyboard([
+            [Markup.button.callback(toggleLabel, `toggle_prod_${prodId}`)],
+            [Markup.button.callback('🗑 Удалить навсегда', `confirm_delete_prod_${prodId}`)],
+            [Markup.button.callback('🔙 Назад', `cat_prods_${product.categoryId}`)]
+        ]));
+    });
+
+    bot.action(/toggle_prod_(.+)/, async (ctx) => {
+        const product = await Product.findByPk(ctx.match[1]);
+        if (!product) return ctx.answerCbQuery('Не найден');
+        await product.update({ isActive: !product.isActive });
+        ctx.answerCbQuery(`✅ Товар ${product.isActive ? 'показан' : 'скрыт'}`);
+        // Переход обратно в manage_prod_... - нет, лучше сразу обновить
+        const statusText = product.isActive ? '✅ Активен' : '🔴 Скрыт';
+        const toggleLabel = product.isActive ? '🔴 Скрыть' : '🟢 Показать';
+        const text = `📦 ${product.name}\n💰 Цена: ${product.price.toLocaleString()} ₽\n📊 Статус: ${statusText}`;
+        await ctx.editMessageText(text, Markup.inlineKeyboard([
+            [Markup.button.callback(toggleLabel, `toggle_prod_${product.id}`)],
+            [Markup.button.callback('🗑 Удалить навсегда', `confirm_delete_prod_${product.id}`)],
+            [Markup.button.callback('🔙 Назад', `cat_prods_${product.categoryId}`)]
+        ]));
+    });
+
+    bot.action(/confirm_delete_prod_(.+)/, (ctx) => {
+        ctx.editMessageText('❓ Вы уверены, что хотите УДАЛИТЬ товар навсегда?', Markup.inlineKeyboard([
+            [Markup.button.callback('🗑 ДА, УДАЛИТЬ', `delete_prod_${ctx.match[1]}`)],
+            [Markup.button.callback('🔙 ОТМЕНА', `manage_prod_${ctx.match[1]}`)]
+        ]));
+    });
+
+    bot.action(/delete_prod_(.+)/, async (ctx) => {
+        const product = await Product.findByPk(ctx.match[1]);
+        if (product) {
+            const catId = product.categoryId;
+            await product.destroy();
+            ctx.answerCbQuery('🗑 Удалено');
+            // Перерисовываем список
+            const products = await Product.findAll({ where: { categoryId: catId } });
+            const buttons = products.map(p => [Markup.button.callback(`${p.isActive ? '🟢' : '🔴'} ${p.name}`, `manage_prod_${p.id}`)]);
+            buttons.push([Markup.button.callback('🔙 Назад', `cat_${catId}`)]);
+            await ctx.editMessageText(`📦 ТОВАРЫ КАТЕГОРИИ`, Markup.inlineKeyboard(buttons));
+        }
+    });
+};
 
 module.exports = { setupCatalogHandlers, pendingActions };

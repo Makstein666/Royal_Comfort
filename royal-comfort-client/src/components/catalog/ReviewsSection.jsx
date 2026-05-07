@@ -8,8 +8,8 @@ const ReviewsSection = ({ categoryId, onLeaveReview }) => {
     useEffect(() => {
         const fetchReviews = async () => {
             try {
-                // Запрашиваем отзывы для конкретной категории (например, 'tub')
-                const res = await fetch(`http://localhost:5000/api/reviews?productId=${categoryId}`);
+                // Запрашиваем отзывы для конкретной категории
+                const res = await fetch(`http://localhost:5000/api/catalog/reviews?categoryId=${categoryId}`);
                 const data = await res.json();
                 if (Array.isArray(data)) {
                     setReviews(data);
@@ -66,8 +66,8 @@ const ReviewsSection = ({ categoryId, onLeaveReview }) => {
                                         <User size={20} />
                                     </div>
                                     <div>
-                                        <h5 className="font-bold text-[#0A2A2A] text-sm">{review.author_name}</h5>
-                                        <span className="text-xs text-gray-400">Проверенный покупатель</span>
+                                        <h5 className="font-bold text-[#0A2A2A] text-sm">{review.author}</h5>
+                                        <span className="text-xs text-gray-400">{review.productName || 'Проверенный покупатель'}</span>
                                     </div>
                                 </div>
                                 <div className="flex gap-0.5">
@@ -82,12 +82,28 @@ const ReviewsSection = ({ categoryId, onLeaveReview }) => {
                                 </div>
                             </div>
                             
-                            <p className="text-gray-600 text-sm leading-relaxed mb-4 flex-grow">
+                            <p className="text-gray-600 text-sm leading-relaxed mb-4 flex-grow italic">
                                 "{review.text}"
                             </p>
 
-                            <div className="text-[10px] text-gray-400 uppercase tracking-wider pt-4 border-t border-gray-50">
-                                {new Date(review.createdAt).toLocaleDateString('ru-RU')}
+                            {/* ФОТОГРАФИИ В ОТЗЫВЕ */}
+                            {review.images && review.images.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {review.images.map((img, idx) => (
+                                        <img 
+                                            key={idx} 
+                                            src={img} 
+                                            alt={`Фото отзыва ${idx + 1}`} 
+                                            className="w-16 h-16 object-cover rounded-lg border border-gray-100 hover:scale-105 transition-transform cursor-pointer"
+                                            onClick={() => window.open(img, '_blank')}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className="text-[10px] text-gray-400 uppercase tracking-wider pt-4 border-t border-gray-50 flex justify-between items-center">
+                                <span>{review.date || new Date(review.createdAt).toLocaleDateString('ru-RU')}</span>
+                                {review.productName && <span className="text-[#B88E2F] font-bold">{review.productName}</span>}
                             </div>
                         </div>
                     ))}
