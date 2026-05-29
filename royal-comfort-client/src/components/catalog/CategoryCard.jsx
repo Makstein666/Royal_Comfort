@@ -5,7 +5,7 @@ const CategoryCard = ({ category, onClick, isComingSoon }) => {
   return (
     <div 
     onClick={() => onClick(category.id)}
-        className={`group relative h-[320px] rounded-[2rem] overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-2 bg-[#F5F1E6]
+        className={`group relative h-[320px] rounded-[2rem] overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-2 bg-[#F5F1E6] isolate [transform:translateZ(0)]
         ${isComingSoon ? 'opacity-90 shadow-md hover:shadow-[0_20px_40px_-15px_rgba(184,142,47,0.2)]' : 'shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(184,142,47,0.3)]'}
         `}
     >

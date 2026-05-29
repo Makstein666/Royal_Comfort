@@ -80,6 +80,12 @@ const Order = sequelize.define('Order', {
   telegramChatId: {
     type: DataTypes.STRING,
     allowNull: true
+  },
+  
+  // Реферальный код друга
+  referralCode: {
+    type: DataTypes.STRING,
+    allowNull: true
   }
 });
 

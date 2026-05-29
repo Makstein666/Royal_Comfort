@@ -1,4 +1,5 @@
-const { Scenes, Markup } = require('telegraf');
+﻿const { Scenes, Markup } = require('telegraf');
+const { mainMenuAdmin } = require('../keyboards');
 const { PromoSettings, Category } = require('../../../models');
 
 const addPromoScene = new Scenes.WizardScene(
@@ -29,19 +30,40 @@ const addPromoScene = new Scenes.WizardScene(
         }
         await ctx.reply('Пожалуйста, выберите категорию кнопкой.');
     },
-    // Шаг 3: Ссылка на изображение
+    // Шаг 3: Загрузка фото подарка
     async (ctx) => {
         if (!ctx.message || !ctx.message.text) return;
         ctx.wizard.state.giftName = ctx.message.text;
         
-        await ctx.reply('Отправьте URL картинки подарка (или введите "нет"):');
+        await ctx.reply(
+            '📸 Отправьте фотографию подарка или введите "пропустить":',
+            Markup.keyboard([['пропустить'], ['Отмена']]).resize()
+        );
         return ctx.wizard.next();
     },
     // Шаг 4: Сохранение
     async (ctx) => {
-        if (!ctx.message || !ctx.message.text) return;
-        let image = ctx.message.text;
-        if (image.toLowerCase() === 'нет') image = null;
+        let image = null;
+
+        if (ctx.message && ctx.message.photo) {
+            const fileId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
+            try {
+                const { downloadTelegramFile } = require('../../../utils/fileDownloader');
+                await ctx.reply('⏳ Загрузка фотографии...');
+                image = await downloadTelegramFile(ctx.telegram, fileId, 'promo');
+            } catch (err) {
+                console.error(err);
+                await ctx.reply('⚠️ Ошибка загрузки фото. Подарок будет настроен без изображения.');
+            }
+        } else if (ctx.message && ctx.message.text && ctx.message.text.toLowerCase() === 'пропустить') {
+            image = null;
+        } else if (ctx.message && ctx.message.text && ctx.message.text.toLowerCase() === 'отмена') {
+            await ctx.reply('Настройка подарка отменена.', mainMenuAdmin);
+            return ctx.scene.leave();
+        } else {
+            await ctx.reply('Пожалуйста, отправьте фотографию подарка или напишите "пропустить":');
+            return;
+        }
 
         try {
             await PromoSettings.upsert({
@@ -50,10 +72,10 @@ const addPromoScene = new Scenes.WizardScene(
                 giftImage: image,
                 isActive: true
             });
-            await ctx.reply(`✅ Подарок успешно настроен!`);
+            await ctx.reply(`✅ Подарок успешно настроен!`, mainMenuAdmin);
         } catch (e) {
             console.error(e);
-            await ctx.reply('❌ Ошибка при сохранении.');
+            await ctx.reply('❌ Ошибка при сохранении.', mainMenuAdmin);
         }
         return ctx.scene.leave();
     }
@@ -65,3 +87,4 @@ addPromoScene.action('cancel', async (ctx) => {
 });
 
 module.exports = { addPromoScene };
+

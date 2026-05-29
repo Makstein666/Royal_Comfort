@@ -41,23 +41,24 @@ const Step = ({ index, status, icon, title, date, desc }) => {
 
 // --- КОНСТАНТЫ И ХЕЛПЕРЫ ---
 const FULL_STEPS_FLOW = [
-    { title: "Заказ оформлен", statusKey: 'Новый', icon: <CheckCircle2/>, desc: "Заявка поступила в систему." },
-    { title: "В производстве", statusKey: 'В производстве', icon: <Hammer/>, desc: "Сварка чаши и сборка каркаса." },
-    { title: "Покраска", statusKey: 'Покраска', icon: <Paintbrush/>, desc: "Нанесение защитного покрытия." },
-    { title: "Контроль качества", statusKey: 'Контроль качества', icon: <ClipboardCheck/>, desc: "Финальная проверка и тесты." },
-    { title: "Доставка", statusKey: 'Доставка', icon: <Truck/>, desc: "Груз передан в транспортную компанию." },
-    { title: "Вручение", statusKey: 'Вручение', icon: <Package/>, desc: "Заказ получен клиентом." }
+    { title: "Обработка", statusKey: 'Обработка', icon: <CheckCircle2/>, desc: "Заявка принята в работу." },
+    { title: "Обсуждение деталей", statusKey: 'Уточнение деталей', icon: <User/>, desc: "Уточняем параметры проекта." },
+    { title: "Утверждение", statusKey: 'Утверждение', icon: <ClipboardCheck/>, desc: "Проект согласован с клиентом." },
+    { title: "Производство", statusKey: 'Производство', icon: <Hammer/>, desc: "Изготовление заказа." },
+    { title: "Доставка", statusKey: 'Доставка', icon: <Truck/>, desc: "Груз передан в логистику." },
+    { title: "Установка", statusKey: 'Установка', icon: <Paintbrush/>, desc: "Монтаж и передача клиенту." }
 ];
 
 const getStepIndex = (status) => {
     if (!status) return 0;
     const map = {
-        'Новый': 0, 'Заказ оформлен': 0,
-        'В производстве': 1,
-        'Покраска': 2,
-        'Контроль качества': 3,
+        'Новый': 0, 'Обработка': 0,
+        'Уточнение деталей': 1,
+        'Утверждение': 2,
+        'Производство': 3,
         'Доставка': 4,
-        'Вручение': 5
+        'Установка': 5,
+        'Завершен': 6
     };
     return map[status] !== undefined ? map[status] : 0;
 };
@@ -66,7 +67,7 @@ const getStepIndex = (status) => {
 const Tracking = () => {
   const [orderId, setOrderId] = useState('');
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState(null);
+  const [statuses, setStatuses] = useState(null); // Теперь массив!
   const [error, setError] = useState('');
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   
@@ -98,59 +99,63 @@ const Tracking = () => {
     
     setError('');
     setLoading(true);
-    setStatus(null);
+    setStatuses(null);
     setOrderId(idToCheck); 
 
     try {
         const response = await fetch(`http://localhost:5000/api/orders/${idToCheck}`);
         
         if (!response.ok) {
-            throw new Error('Заказ не найден');
+            const errData = await response.json();
+            throw new Error(errData.message || 'Заказ не найден');
         }
 
-        const data = await response.json(); 
+        const dataArray = await response.json(); // Теперь получаем массив
+        
+        const mappedStatuses = dataArray.map(data => {
+            const isCancelled = data.status === 'Отменен';
+            const isCompleted = data.status === 'Завершен';
+            const currentIndex = getStepIndex(data.status);
 
-        const isCancelled = data.status === 'Отменен';
-        const currentIndex = getStepIndex(data.status);
+            const uiHistory = FULL_STEPS_FLOW.map((step, index) => {
+                let stepStatus = 'pending';
+                let stepDate = null;
 
-        const uiHistory = FULL_STEPS_FLOW.map((step, index) => {
-            let stepStatus = 'pending';
-            let stepDate = null;
+                if (index < currentIndex || isCompleted) stepStatus = 'completed';
+                else if (index === currentIndex && !isCompleted && !isCancelled) stepStatus = 'current';
 
-            if (index < currentIndex) stepStatus = 'completed';
-            else if (index === currentIndex) stepStatus = 'current';
+                if (data.history && Array.isArray(data.history)) {
+                     const historyItem = data.history.find(h => h.title === step.statusKey || h.title === step.title);
+                     if (historyItem) stepDate = historyItem.date;
+                }
+                if (index === 0 && data.date) {
+                     stepDate = new Date(data.date).toLocaleDateString('ru-RU');
+                }
 
-            if (data.history && Array.isArray(data.history)) {
-                 // Ищем дату в истории заказа
-                 const historyItem = data.history.find(h => h.title === step.statusKey || h.title === step.title);
-                 if (historyItem) stepDate = historyItem.date;
-            }
-            // Для первого шага всегда ставим дату создания, если она есть
-            if (index === 0 && data.date) {
-                 stepDate = new Date(data.date).toLocaleDateString('ru-RU');
-            }
+                return { ...step, status: stepStatus, date: stepDate };
+            });
 
-            return { ...step, status: stepStatus, date: stepDate };
+            const totalSteps = FULL_STEPS_FLOW.length - 1;
+            const progressPercent = isCompleted ? 100 : (totalSteps > 0 ? Math.round((currentIndex / totalSteps) * 100) : 0);
+
+            return {
+                id: data.id,
+                product: data.product,
+                manager: data.manager || 'Отдел заботы',
+                phone: '+7 (925) 520-40-53',
+                estimatedDate: isCancelled ? 'Отменен' : isCompleted ? 'Успешно завершен' : data.status,
+                isCancelled: isCancelled,
+                isCompleted: isCompleted,
+                history: uiHistory,
+                progressPercent: isCancelled ? 0 : progressPercent
+            };
         });
 
-        // Рассчитываем процент прогресса для анимации линии
-        const totalSteps = FULL_STEPS_FLOW.length - 1;
-        const progressPercent = totalSteps > 0 ? Math.round((currentIndex / totalSteps) * 100) : 0;
-
-        setStatus({
-            id: data.id,
-            product: data.product,
-            manager: data.manager || 'Отдел заботы',
-            phone: '+7 (925) 520-40-53',
-            estimatedDate: isCancelled ? 'Отменен' : data.status,
-            isCancelled: isCancelled,
-            history: uiHistory,
-            progressPercent: isCancelled ? 0 : progressPercent
-        });
+        setStatuses(mappedStatuses);
 
     } catch (err) {
         console.error(err);
-        setError('Заказ с таким номером не найден. Проверьте ввод.');
+        setError(err.message || 'Заказ с таким номером не найден. Проверьте ввод.');
     } finally {
         setLoading(false);
     }
@@ -261,78 +266,86 @@ const Tracking = () => {
 
           {/* РЕЗУЛЬТАТ ПОИСКА */}
           <AnimatePresence mode="wait">
-            {status && (
-                <motion.div 
-                    key="status-card"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="bg-white rounded-[2.5rem] shadow-2xl border border-[#B88E2F]/10 overflow-hidden"
-                >
-                    <div className={`${status.isCancelled ? 'bg-red-900' : 'bg-[#0A2A2A]'} p-8 md:p-10 text-white relative overflow-hidden transition-colors duration-500`}>
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[80px] pointer-events-none"></div>
-                        <div className="flex flex-col md:flex-row justify-between items-start gap-6 relative z-10">
-                            <div>
-                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-lg text-xs font-bold tracking-widest uppercase mb-4 border border-white/5">
-                                    <Package size={14} className={status.isCancelled ? "text-red-300" : "text-[#B88E2F]"}/> Заказ #{status.id}
+            {statuses && statuses.length > 0 && (
+                <div className="space-y-8">
+                    {statuses.length > 1 && (
+                        <h3 className="text-xl font-bold text-[#0A2A2A] mb-4">Найдено заказов: {statuses.length}</h3>
+                    )}
+                    {statuses.map((statusItem, idx) => (
+                        <motion.div 
+                            key={`status-card-${statusItem.id}-${idx}`}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ delay: idx * 0.1 }}
+                            className="bg-white rounded-[2.5rem] shadow-2xl border border-[#B88E2F]/10 overflow-hidden"
+                        >
+                            <div className={`${statusItem.isCancelled ? 'bg-red-900' : statusItem.isCompleted ? 'bg-green-900' : 'bg-[#0A2A2A]'} p-8 md:p-10 text-white relative overflow-hidden transition-colors duration-500`}>
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[80px] pointer-events-none"></div>
+                                <div className="flex flex-col md:flex-row justify-between items-start gap-6 relative z-10">
+                                    <div>
+                                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-lg text-xs font-bold tracking-widest uppercase mb-4 border border-white/5">
+                                            <Package size={14} className={statusItem.isCancelled ? "text-red-300" : "text-[#B88E2F]"}/> Заказ #{statusItem.id}
+                                        </div>
+                                        <h2 className="text-3xl font-serif font-bold mb-2">{statusItem.product}</h2>
+                                        <p className="text-white/60 text-sm">Ваш менеджер: <span className="text-white">{statusItem.manager}</span></p>
+                                    </div>
+                                    <div className="text-left md:text-right">
+                                        <p className={`text-xs font-bold uppercase tracking-widest mb-1 ${statusItem.isCancelled ? 'text-red-300' : 'text-[#B88E2F]'}`}>
+                                            {statusItem.isCancelled || statusItem.isCompleted ? 'Статус' : 'Текущий этап'}
+                                        </p>
+                                        <div className="text-2xl font-bold">{statusItem.estimatedDate}</div>
+                                    </div>
                                 </div>
-                                <h2 className="text-3xl font-serif font-bold mb-2">{status.product}</h2>
-                                <p className="text-white/60 text-sm">Ваш менеджер: <span className="text-white">{status.manager}</span></p>
                             </div>
-                            <div className="text-left md:text-right">
-                                <p className={`text-xs font-bold uppercase tracking-widest mb-1 ${status.isCancelled ? 'text-red-300' : 'text-[#B88E2F]'}`}>
-                                    {status.isCancelled ? 'Статус' : 'Текущий этап'}
-                                </p>
-                                <div className="text-2xl font-bold">{status.isCancelled ? 'Отменен' : status.estimatedDate}</div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div className="p-8 md:p-12">
-                        {status.isCancelled ? (
-                             <div className="text-center py-10">
-                                <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                                <h3 className="text-2xl font-bold text-gray-800">Заказ аннулирован</h3>
-                                <p className="text-gray-500 mt-2">Если это ошибка, свяжитесь с менеджером.</p>
-                             </div>
-                        ) : (
-                            <div className="relative pl-4 md:pl-6 space-y-10">
-                                <div className="absolute left-[23px] md:left-[31px] top-4 bottom-4 w-0.5 bg-gray-100">
-                                    <motion.div 
-                                        initial={{ height: 0 }}
-                                        animate={{ height: `${status.progressPercent}%` }}
-                                        transition={{ duration: 1.2, ease: 'easeOut' }}
-                                        className="w-full bg-[#B88E2F] origin-top"
-                                    />
-                                </div>
+                            <div className="p-8 md:p-12">
+                                {statusItem.isCancelled ? (
+                                     <div className="text-center py-10">
+                                        <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                                        <h3 className="text-2xl font-bold text-gray-800">Заказ аннулирован</h3>
+                                        <p className="text-gray-500 mt-2">Если это ошибка, свяжитесь с менеджером.</p>
+                                     </div>
+                                ) : (
+                                    <div className="relative pl-4 md:pl-6 space-y-10">
+                                        <div className="absolute left-[23px] md:left-[31px] top-4 bottom-4 w-0.5 bg-gray-100">
+                                            <motion.div 
+                                                initial={{ height: 0 }}
+                                                animate={{ height: `${statusItem.progressPercent}%` }}
+                                                transition={{ duration: 1.2, ease: 'easeOut' }}
+                                                className={`w-full ${statusItem.isCompleted ? 'bg-green-500' : 'bg-[#B88E2F]'} origin-top`}
+                                            />
+                                        </div>
 
-                                {status.history.map((step, index) => (
-                                    <Step 
-                                        key={index} 
-                                        index={index} 
-                                        status={step.status}
-                                        icon={step.icon} 
-                                        title={step.title} 
-                                        desc={step.desc}
-                                        date={step.date}
-                                    />
-                                ))}
-                            </div>
-                        )}
+                                        {statusItem.history.map((step, index) => (
+                                            <Step 
+                                                key={index} 
+                                                index={index} 
+                                                status={step.status}
+                                                icon={step.icon} 
+                                                title={step.title} 
+                                                desc={step.desc}
+                                                date={step.date}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
 
-                        {!status.isCancelled && (
-                            <div className="mt-12 pt-8 border-t border-gray-100 flex justify-between items-center">
-                                <div className="hidden md:block text-xs text-gray-400">
-                                    Есть вопросы по заказу?
-                                </div>
-                                <a href={`tel:${status.phone}`} className="flex items-center gap-3 px-6 py-3 bg-[#FDFBF7] text-[#0A2A2A] font-bold rounded-xl hover:bg-[#B88E2F] hover:text-white transition-all group">
-                                    <Phone size={18} className="text-[#B88E2F] group-hover:text-white transition-colors"/>
-                                    Связаться с менеджером
-                                </a>
+                                {!statusItem.isCancelled && !statusItem.isCompleted && (
+                                    <div className="mt-12 pt-8 border-t border-gray-100 flex justify-between items-center">
+                                        <div className="hidden md:block text-xs text-gray-400">
+                                            Есть вопросы по заказу?
+                                        </div>
+                                        <a href={`tel:${statusItem.phone}`} className="flex items-center gap-3 px-6 py-3 bg-[#FDFBF7] text-[#0A2A2A] font-bold rounded-xl hover:bg-[#B88E2F] hover:text-white transition-all group">
+                                            <Phone size={18} className="text-[#B88E2F] group-hover:text-white transition-colors"/>
+                                            Связаться с менеджером
+                                        </a>
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
-                </motion.div>
+                        </motion.div>
+                    ))}
+                </div>
             )}
           </AnimatePresence>
       </div>

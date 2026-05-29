@@ -1,4 +1,5 @@
 const { Scenes, Markup } = require('telegraf');
+const { mainMenuClient } = require('../keyboards');
 const { Order, Review, Category, Product } = require('../../../models');
 
 const addReviewScene = new Scenes.WizardScene(
@@ -14,7 +15,7 @@ const addReviewScene = new Scenes.WizardScene(
         const orderId = ctx.message.text.trim();
 
         if (orderId === '❌ Отмена') {
-            await ctx.reply('Отменено.', Markup.removeKeyboard());
+            await ctx.reply('Отменено.', mainMenuClient);
             return ctx.scene.leave();
         }
 
@@ -89,7 +90,7 @@ const addReviewScene = new Scenes.WizardScene(
     // Шаг 6: Сбор фото и сохранение
     async (ctx) => {
         if (ctx.message && ctx.message.text === '❌ Отмена') {
-            await ctx.reply('Отменено.', Markup.removeKeyboard());
+            await ctx.reply('Отменено.', mainMenuClient);
             return ctx.scene.leave();
         }
 
@@ -97,10 +98,15 @@ const addReviewScene = new Scenes.WizardScene(
             if (ctx.message.photo) {
                 // Берем самое большое разрешение фото
                 const fileId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
-                // Получаем ссылку на файл через Telegram API (в реальности нужно скачать и сохранить у себя)
-                // Но для прототипа сохраним fileId или URL если бот имеет доступ
-                const fileUrl = await ctx.telegram.getFileLink(fileId);
-                ctx.wizard.state.images.push(fileUrl.href);
+                try {
+                    const { downloadTelegramFile } = require('../../../utils/fileDownloader');
+                    await ctx.reply('⏳ Загрузка фотографии...');
+                    const relativeUrl = await downloadTelegramFile(ctx.telegram, fileId, 'reviews');
+                    ctx.wizard.state.images.push(relativeUrl);
+                } catch (err) {
+                    console.error(err);
+                    await ctx.reply('⚠️ Ошибка загрузки фото. Попробуйте еще раз.');
+                }
                 
                 if (ctx.wizard.state.images.length < 5) {
                     await ctx.reply(`📸 Фото получено (${ctx.wizard.state.images.length}/5). Можете прислать еще или нажать "Готово"`, Markup.keyboard([['✅ Готово'], ['❌ Отмена']]).resize());
@@ -108,61 +114,60 @@ const addReviewScene = new Scenes.WizardScene(
                 }
             }
 
-            // Сохранение
-            try {
-                const { order, rating, text, images } = ctx.wizard.state;
-                
-                // Определяем категорию
-                let categoryId = order.productId;
-                const category = await Category.findByPk(order.productId);
-                if (!category) {
-                    const product = await Product.findByPk(order.productId);
-                    if (product) categoryId = product.categoryId;
-                }
-
-                await Review.create({
-                    author: order.clientName,
-                    text,
-                    rating,
-                    images: images || [],
-                    orderId: order.id,
-                    productName: order.productName,
-                    categoryId,
-                    date: new Date().toLocaleDateString('ru-RU'),
-                    isApproved: false
-                });
-
-                await ctx.reply('🎉 Спасибо за ваш отзыв! Он появится на сайте после модерации.', Markup.removeKeyboard());
-            } catch (e) {
-                console.error(e);
-                await ctx.reply('❌ Ошибка при сохранении отзыва.');
-            }
+            await saveReviewAndNotify(ctx);
             return ctx.scene.leave();
         }
         
         if (ctx.message && ctx.message.text === '✅ Готово') {
-             // Повтор логики сохранения (DRY - можно вынести в функцию)
-             // Для краткости просто скопирую
-             try {
-                const { order, rating, text, images } = ctx.wizard.state;
-                let categoryId = order.productId;
-                const category = await Category.findByPk(order.productId);
-                if (!category) {
-                    const product = await Product.findByPk(order.productId);
-                    if (product) categoryId = product.categoryId;
-                }
-                await Review.create({
-                    author: order.clientName, text, rating, images, orderId: order.id, productName: order.productName, categoryId, date: new Date().toLocaleDateString('ru-RU'), isApproved: false
-                });
-                await ctx.reply('🎉 Спасибо за ваш отзыв! Он появится на сайте после модерации.', Markup.removeKeyboard());
-            } catch (e) { console.error(e); await ctx.reply('❌ Ошибка при сохранении.'); }
+            await saveReviewAndNotify(ctx);
             return ctx.scene.leave();
         }
     }
 );
 
+async function saveReviewAndNotify(ctx) {
+    try {
+        const { order, rating, text, images } = ctx.wizard.state;
+        
+        // Определяем категорию
+        let categoryId = order.productId;
+        const category = await Category.findByPk(order.productId);
+        if (!category) {
+            const product = await Product.findByPk(order.productId);
+            if (product) categoryId = product.categoryId;
+        }
+
+        const review = await Review.create({
+            author: order.clientName,
+            text,
+            rating,
+            images: images || [],
+            orderId: order.id,
+            productName: order.productName,
+            categoryId,
+            date: new Date().toLocaleDateString('ru-RU'),
+            isApproved: false
+        });
+
+        // Используем lazy require — к моменту вызова сцены index.js уже загружен (нет circular dependency issue)
+        try {
+            const botModule = require('../index');
+            if (botModule && botModule.notifyAdminAboutNewReview) {
+                botModule.notifyAdminAboutNewReview(review).catch(e => console.error('Ошибка уведомления:', e));
+            }
+        } catch (notifyErr) {
+            console.error('Не удалось отправить уведомление об отзыве:', notifyErr);
+        }
+
+        await ctx.reply('🎉 Спасибо за ваш отзыв! Он появится на сайте после модерации.', mainMenuClient);
+    } catch (e) {
+        console.error(e);
+        await ctx.reply('❌ Ошибка при сохранении отзыва.');
+    }
+}
+
 addReviewScene.hears('❌ Отмена', async (ctx) => {
-    await ctx.reply('Отменено.', Markup.removeKeyboard());
+    await ctx.reply('Отменено.', mainMenuClient);
     return ctx.scene.leave();
 });
 

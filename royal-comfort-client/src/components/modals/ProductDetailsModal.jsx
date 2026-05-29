@@ -19,11 +19,6 @@ const ProductDetailsModal = ({ isOpen, onClose, product, onOrder }) => {
 
   const details = {
       specs: productSpecs.length > 0 ? productSpecs : productFeatures.map(f => ({ label: 'Особенность', value: f })),
-      colors: [
-          { name: 'Лиственница (Натуральный)', hex: '#8B4513' },
-          { name: 'Кедр (Светлый)', hex: '#D2B48C' }
-      ],
-      process: "Наше производство в Челябинске использует только сертифицированную нержавеющую сталь AISI 304/430 и отборную древесину лиственницы или кедра. Сборка осуществляется вручную опытными мастерами с многоэтапным контролем качества сварных швов и герметичности чаши.",
       fullDescription: product.description
   };
 
@@ -112,7 +107,6 @@ const ProductDetailsModal = ({ isOpen, onClose, product, onOrder }) => {
               <div className="px-6 md:px-10 pt-6 md:pt-12 pb-0 border-b border-gray-200 flex gap-4 shrink-0 bg-white">
                   <TabButton id="desc" label="О проекте" />
                   <TabButton id="specs" label="Характеристики" />
-                  <TabButton id="process" label="Производство" />
               </div>
 
               {/* Скроллируемая область контента */}
@@ -148,47 +142,26 @@ const ProductDetailsModal = ({ isOpen, onClose, product, onOrder }) => {
                   {activeTab === 'specs' && (
                       <div className="space-y-6 animate-fade-in">
                           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                              {details.specs && details.specs.map((spec, i) => (
-                                  <div key={i} className="flex justify-between items-center p-4 border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                                      <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">{spec.label}</span>
-                                      <span className="text-royal-900 font-bold text-sm text-right">{spec.value}</span>
+                              {details.specs && details.specs.length > 0 ? (
+                                  details.specs.map((spec, i) => (
+                                      <div key={i} className="flex justify-between items-center p-4 border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                                          <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">{spec.label}</span>
+                                          <span className="text-royal-900 font-bold text-sm text-right">{spec.value}</span>
+                                      </div>
+                                  ))
+                              ) : (
+                                  <div className="p-8 text-center flex flex-col items-center justify-center">
+                                      <Layers className="text-gray-300 mb-3" size={32} />
+                                      <p className="text-gray-500 text-sm font-medium">Характеристики находятся в процессе заполнения.</p>
+                                      <p className="text-gray-400 text-xs mt-1">Уточните детали у менеджера при оформлении заявки.</p>
                                   </div>
-                              ))}
+                              )}
                           </div>
 
-                          {details.colors && details.colors.length > 0 && (
-                              <div>
-                                  <h4 className="text-royal-900 font-bold mb-3 uppercase text-xs tracking-widest flex items-center gap-2">
-                                      <PenTool size={14} className="text-gold-500"/> Цвета отделки
-                                  </h4>
-                                  <div className="flex flex-wrap gap-2">
-                                      {details.colors.map((color, i) => (
-                                          <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white">
-                                              <div className="w-6 h-6 rounded-full border border-gray-300" style={{ backgroundColor: color.hex }}></div>
-                                              <span className="text-xs font-bold text-gray-700">{color.name}</span>
-                                          </div>
-                                      ))}
-                                  </div>
-                              </div>
-                          )}
                       </div>
                   )}
 
-                  {/* 3. ПРОИЗВОДСТВО */}
-                  {activeTab === 'process' && (
-                      <div className="space-y-6 animate-fade-in">
-                          <p className="text-gray-700 leading-relaxed text-base">
-                              {details.process}
-                          </p>
-                          <div className="p-5 bg-royal-900 text-white rounded-xl flex items-start gap-4">
-                              <CheckCircle className="text-gold-500 shrink-0 mt-1" size={24}/>
-                              <div>
-                                  <h5 className="font-bold text-base mb-1">Ручная сборка</h5>
-                                  <p className="text-gray-300 text-xs leading-relaxed">Каждая деталь проходит строгий контроль качества. Мы не используем поточный метод.</p>
-                              </div>
-                          </div>
-                      </div>
-                  )}
+                  
               </div>
 
               {/* ФУТЕР (Кнопка) */}

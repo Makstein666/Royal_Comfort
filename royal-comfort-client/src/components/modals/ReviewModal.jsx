@@ -8,7 +8,9 @@ const ReviewModal = ({ isOpen, onClose, prefilledOrderId = '' }) => {
   const [rating, setRating] = useState(5);
   const [text, setText] = useState('');
   const [name, setName] = useState('');
+  const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState('idle'); // idle, loading, success, error
+  const [error, setError] = useState('');
 
   // Сброс при открытии
   React.useEffect(() => {
@@ -17,6 +19,8 @@ const ReviewModal = ({ isOpen, onClose, prefilledOrderId = '' }) => {
         setOrderId(prefilledOrderId);
         setRating(5);
         setText('');
+        setConsent(false);
+        setError('');
         setStatus('idle');
     }
   }, [isOpen, prefilledOrderId]);
@@ -25,6 +29,13 @@ const ReviewModal = ({ isOpen, onClose, prefilledOrderId = '' }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
+    if (step === 2 && !consent) {
+        setError('Необходимо согласие на обработку данных');
+        return;
+    }
+
     setStatus('loading');
 
     try {
@@ -34,7 +45,8 @@ const ReviewModal = ({ isOpen, onClose, prefilledOrderId = '' }) => {
             body: JSON.stringify({
                 orderId: orderId,
                 rating: rating,
-                text: text
+                text: text,
+                author: name
             })
         });
 
@@ -118,14 +130,43 @@ const ReviewModal = ({ isOpen, onClose, prefilledOrderId = '' }) => {
                            />
 
                            <textarea 
-                              placeholder="Что вам понравилось?" 
-                              required
-                              className="w-full p-3 bg-white border border-gray-200 rounded-xl h-32 resize-none"
-                              value={text} onChange={e => setText(e.target.value)}
+                               placeholder="Что вам понравилось?" 
+                               required
+                               className="w-full p-3 bg-white border border-gray-200 rounded-xl h-32 resize-none"
+                               value={text} onChange={e => setText(e.target.value)}
                            />
 
+                           {/* Чекбокс согласия */}
+                           <div className="flex items-start gap-3 mt-4">
+                             <div className="flex items-center h-5 mt-0.5">
+                               <input
+                                 id="consent-review"
+                                 type="checkbox"
+                                 checked={consent}
+                                 onChange={(e) => {
+                                     setConsent(e.target.checked);
+                                     if(e.target.checked) setError('');
+                                 }}
+                                 className={`w-5 h-5 rounded border-gray-300 text-[#B88E2F] focus:ring-[#B88E2F] cursor-pointer transition-colors ${
+                                   error ? 'border-red-500' : ''
+                                 }`}
+                               />
+                             </div>
+                             <div className="text-xs text-gray-500 leading-tight text-left">
+                               <label htmlFor="consent-review" className="cursor-pointer">
+                                 Я даю согласие на обработку своих персональных данных в соответствии с{' '}
+                               </label>
+                               <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#B88E2F] hover:underline">
+                                 политикой конфиденциальности
+                               </a>
+                               {error && (
+                                 <p className="text-red-500 mt-1">{error}</p>
+                               )}
+                             </div>
+                           </div>
+
                            <button 
-                              type="submit" 
+                               type="submit" 
                               disabled={status === 'loading'}
                               className="w-full py-4 bg-[#B88E2F] text-[#0A2A2A] rounded-xl font-bold flex justify-center items-center gap-2 hover:bg-[#a67c22]"
                            >

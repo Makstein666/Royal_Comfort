@@ -14,18 +14,53 @@ exports.createOrder = async (req, res) => {
     try {
         const { 
             type, clientName, clientPhone, contactMethod, preferredTime,
-            productId, productName, totalPrice, configuration, gift
+            productId, productName, totalPrice, configuration, gift, referralCode,
+            notes, referenceFiles
         } = req.body;
+
+        if (!clientName || clientName.trim().length < 2) {
+            return res.status(400).json({ success: false, message: "Некорректное имя клиента" });
+        }
+        if (!clientPhone || clientPhone.replace(/\D/g, '').length < 10) {
+            return res.status(400).json({ success: false, message: "Некорректный номер телефона" });
+        }
+        if (totalPrice !== undefined && (isNaN(totalPrice) || totalPrice < 0)) {
+            return res.status(400).json({ success: false, message: "Некорректная сумма заказа" });
+        }
 
         const newId = generateOrderId();
         const initialHistory = [
             { title: "Заказ оформлен", date: new Date().toLocaleDateString('ru-RU') }
         ];
 
+        const { ReferralCode } = require('../models');
+        let refDetails = null;
+
+        if (referralCode) {
+            const cleanCode = referralCode.trim().toUpperCase();
+            const referral = await ReferralCode.findByPk(cleanCode);
+            const cleanClientPhone = clientPhone.replace(/\D/g, '');
+            
+            // Защита от самореферальства (нельзя применить свой же код)
+            if (referral && !referral.isUsed && referral.ownerPhone !== cleanClientPhone) {
+                await referral.update({ isUsed: true, usedByOrderId: newId });
+                refDetails = {
+                    code: cleanCode,
+                    ownerName: referral.ownerName,
+                    ownerPhone: referral.ownerPhone
+                };
+            }
+        }
+
+        let finalConfig = configuration || {};
+        if (notes || (referenceFiles && referenceFiles.length > 0)) {
+            finalConfig = { ...finalConfig, notes, referenceFiles };
+        }
+
         const newOrder = await Order.create({
             id: newId,
             type: type || 'order',
-            status: 'Новый', // Начальный статус
+            status: 'Новый',
             clientName,
             clientPhone,
             contactMethod,
@@ -33,8 +68,9 @@ exports.createOrder = async (req, res) => {
             productId,
             productName,
             totalPrice,
-            configuration,
+            configuration: finalConfig,
             gift,
+            referralCode,
             history: initialHistory
         });
 
@@ -42,11 +78,15 @@ exports.createOrder = async (req, res) => {
         
         // Уведомляем админа
         notifyAdminAboutNewOrder(newId, {
+            type,
             clientName,
             clientPhone,
             contactMethod,
             productName,
-            totalPrice
+            totalPrice,
+            referralCode,
+            referralDetails: refDetails,
+            configuration: finalConfig
         });
 
         res.status(201).json({ success: true, orderId: newId });
@@ -57,7 +97,7 @@ exports.createOrder = async (req, res) => {
     }
 };
 
-// 2. Получить статус конкретного заказа (Поиск)
+// 2. Получить статус(ы) конкретного заказа (Поиск по ID)
 exports.getOrderStatus = async (req, res) => {
     try {
         const { id } = req.params;
@@ -69,14 +109,35 @@ exports.getOrderStatus = async (req, res) => {
             return res.status(404).json({ message: "Заказ не найден" });
         }
 
-        res.json({
-            id: order.id,
-            product: order.productName || 'Индивидуальный заказ',
-            status: order.status,
-            date: order.createdAt,
-            history: order.history,
-            manager: "Алексей" 
+        if (order.type === 'consultation') {
+            return res.status(404).json({ message: "Это заявка на консультацию. Менеджер свяжется с вами." });
+        }
+
+        // Ищем все заказы этого же клиента (по телефону или имени)
+        const whereClause = {
+            type: 'order',
+            [Op.or]: []
+        };
+        
+        if (order.clientPhone) whereClause[Op.or].push({ clientPhone: order.clientPhone });
+        if (order.clientName) whereClause[Op.or].push({ clientName: order.clientName });
+
+        const allOrders = await Order.findAll({
+            where: whereClause,
+            order: [['createdAt', 'DESC']]
         });
+
+        // Возвращаем массив
+        const result = allOrders.map(o => ({
+            id: o.id,
+            product: o.productName || 'Индивидуальный заказ',
+            status: o.status,
+            date: o.createdAt,
+            history: o.history,
+            manager: "Алексей" 
+        }));
+
+        res.json(result);
 
     } catch (error) {
         console.error("Ошибка поиска:", error);

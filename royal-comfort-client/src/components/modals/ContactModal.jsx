@@ -2,6 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Phone, User, Clock, CheckCircle, Loader2, Send, MessageCircle } from 'lucide-react';
 
+// Иконка Макс — стильная буква M
+const MaxIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" fillOpacity="0.12"/>
+    <path d="M6 17V7l6 7 6-7v10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 const ContactModal = ({ isOpen, onClose, title = "Заказать звонок", subtitle = "", productName = "" }) => {
   const [formState, setFormState] = useState({
     name: '',
@@ -11,6 +19,7 @@ const ContactModal = ({ isOpen, onClose, title = "Заказать звонок"
   const [status, setStatus] = useState('idle'); // idle, loading, success
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState(false);
+  const [consent, setConsent] = useState(false);
 
   // Сброс при открытии
   useEffect(() => {
@@ -19,6 +28,7 @@ const ContactModal = ({ isOpen, onClose, title = "Заказать звонок"
       setFormState({ name: '', phone: '+7', time: 'asap' });
       setErrors({});
       setTouched(false);
+      setConsent(false);
     }
   }, [isOpen]);
 
@@ -58,6 +68,9 @@ const ContactModal = ({ isOpen, onClose, title = "Заказать звонок"
     const digits = data.phone.replace(/\D/g, '');
     if (digits.length < 11) {
       errs.phone = 'Введите полный номер телефона (+7 и 10 цифр)';
+    }
+    if (!consent) {
+      errs.consent = 'Необходимо согласие на обработку данных';
     }
     return errs;
   };
@@ -235,6 +248,32 @@ const ContactModal = ({ isOpen, onClose, title = "Заказать звонок"
                     </div>
                   </div>
 
+                  {/* Чекбокс согласия */}
+                  <div className="flex items-start gap-3 mt-4">
+                    <div className="flex items-center h-5 mt-0.5">
+                      <input
+                        id="consent-contact"
+                        type="checkbox"
+                        checked={consent}
+                        onChange={(e) => setConsent(e.target.checked)}
+                        className={`w-5 h-5 rounded border-gray-300 text-[#B88E2F] focus:ring-[#B88E2F] cursor-pointer transition-colors ${
+                          touched && errors.consent ? 'border-red-500' : ''
+                        }`}
+                      />
+                    </div>
+                    <div className="text-xs text-gray-500 leading-tight text-left">
+                      <label htmlFor="consent-contact" className="cursor-pointer">
+                        Я даю согласие на обработку своих персональных данных в соответствии с{' '}
+                      </label>
+                      <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#B88E2F] hover:underline">
+                        политикой конфиденциальности
+                      </a>
+                      {touched && errors.consent && (
+                        <p className="text-red-500 mt-1">{errors.consent}</p>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Кнопка */}
                   <button
                     type="submit"
@@ -256,7 +295,7 @@ const ContactModal = ({ isOpen, onClose, title = "Заказать звонок"
                   </p>
                   <div className="flex gap-3">
                     <a
-                      href="https://t.me/John_Kristov"
+                      href="https://t.me/royal_comfort1"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex-1 py-3 bg-[#0A2A2A] text-[#B88E2F] rounded-xl flex items-center justify-center gap-2 font-bold text-sm hover:bg-[#B88E2F] hover:text-[#0A2A2A] transition-all shadow-md group"
@@ -266,13 +305,23 @@ const ContactModal = ({ isOpen, onClose, title = "Заказать звонок"
                     </a>
 
                     <a
-                      href="https://wa.me/79255204053"
+                      href="https://wa.me/79338987788"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex-1 py-3 bg-[#0A2A2A] text-[#B88E2F] rounded-xl flex items-center justify-center gap-2 font-bold text-sm hover:bg-[#B88E2F] hover:text-[#0A2A2A] transition-all shadow-md group"
                     >
                       <MessageCircle size={18} className="group-hover:-translate-y-0.5 transition-transform" />
                       WhatsApp
+                    </a>
+
+                    <a
+                      href="https://max.ru/u/f9LHodD0cOIaP6VEQ8R6vANhN5ifyiIsyqMYVa3wPSOsnnKMyZ9ZfK2m5Vg"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 py-3 bg-[#0A2A2A] text-[#B88E2F] rounded-xl flex items-center justify-center gap-2 font-bold text-sm hover:bg-[#B88E2F] hover:text-[#0A2A2A] transition-all shadow-md group"
+                    >
+                      <MaxIcon size={18} />
+                      Макс
                     </a>
                   </div>
                 </div>

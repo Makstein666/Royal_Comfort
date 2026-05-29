@@ -6,6 +6,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const sequelize = require('./src/config/database'); 
 const apiRoutes = require('./src/routes/api');
 const rateLimit = require('express-rate-limit');
@@ -17,6 +18,7 @@ const app = express();
 // --- Middleware Setup ---
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // --- Rate Limiting ---
 const apiLimiter = rateLimit({
@@ -48,6 +50,18 @@ const PORT = process.env.PORT || 5000;
 async function startApplication() {
   try {
     // 1. Sync Database
+    // Сначала чистим мусорные _backup таблицы если есть (остаются после сбойного alter)
+    try {
+      await sequelize.query('DROP TABLE IF EXISTS `Categories_backup`');
+      await sequelize.query('DROP TABLE IF EXISTS `Products_backup`');
+      await sequelize.query('DROP TABLE IF EXISTS `Orders_backup`');
+      await sequelize.query('DROP TABLE IF EXISTS `Reviews_backup`');
+    } catch (cleanErr) {
+      // игнорируем — таблиц может не быть
+    }
+
+    // sync без alter (SQLite не поддерживает MODIFY COLUMN)
+    // Новые таблицы создаются, существующие не трогаются
     await sequelize.sync();
     console.log('✅ База данных синхронизирована (SQLite)');
     

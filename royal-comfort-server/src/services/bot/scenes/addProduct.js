@@ -1,4 +1,5 @@
 const { Scenes, Markup } = require('telegraf');
+const { mainMenuAdmin } = require('../keyboards');
 const { Product, Category } = require('../../../models');
 
 const addProductScene = new Scenes.WizardScene(
@@ -52,18 +53,77 @@ const addProductScene = new Scenes.WizardScene(
         await ctx.reply('Введите описание товара:');
         return ctx.wizard.next();
     },
-    // Шаг 5: Ссылка на изображение (опционально)
+    // Шаг 5: Загрузка фото товара
     async (ctx) => {
         if (!ctx.message || !ctx.message.text) return;
         ctx.wizard.state.description = ctx.message.text;
-        await ctx.reply('Отправьте URL картинки (или введите "нет" если пока без картинки):');
+        await ctx.reply(
+            '📸 Отправьте фотографию товара или введите "пропустить":',
+            Markup.keyboard([['пропустить'], ['Отмена']]).resize()
+        );
         return ctx.wizard.next();
     },
-    // Шаг 6: Сохранение
+    // Шаг 6: Характеристики
+    async (ctx) => {
+        let image = null;
+
+        if (ctx.message && ctx.message.photo) {
+            const fileId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
+            try {
+                const { downloadTelegramFile } = require('../../../utils/fileDownloader');
+                await ctx.reply('⏳ Загрузка фотографии...');
+                image = await downloadTelegramFile(ctx.telegram, fileId, 'products');
+            } catch (err) {
+                console.error(err);
+                await ctx.reply('⚠️ Ошибка загрузки фото. Товар будет добавлен без изображения.');
+            }
+        } else if (ctx.message && ctx.message.text && ctx.message.text.toLowerCase() === 'пропустить') {
+            image = null;
+        } else if (ctx.message && ctx.message.text && ctx.message.text.toLowerCase() === 'отмена') {
+            await ctx.reply('Создание товара отменено.', mainMenuAdmin);
+            return ctx.scene.leave();
+        } else {
+            await ctx.reply('Пожалуйста, отправьте фотографию товара или напишите "пропустить":');
+            return;
+        }
+
+        ctx.wizard.state.image = image;
+
+        await ctx.reply(
+            '📋 Введите характеристики товара.\n' +
+            'Каждая характеристика с новой строки в формате:\n' +
+            'Название: Значение\n\n' +
+            'Пример:\n' +
+            'Вместимость: 4-6 человек\n' +
+            'Диаметр чаши: 2050 мм\n\n' +
+            'Или нажмите "пропустить":',
+            Markup.keyboard([['пропустить'], ['Отмена']]).resize()
+        );
+        return ctx.wizard.next();
+    },
+    // Шаг 7: Сохранение товара в БД
     async (ctx) => {
         if (!ctx.message || !ctx.message.text) return;
-        let image = ctx.message.text;
-        if (image.toLowerCase() === 'нет') image = null;
+        const text = ctx.message.text.trim();
+        
+        if (text.toLowerCase() === 'отмена') {
+            await ctx.reply('Создание товара отменено.', mainMenuAdmin);
+            return ctx.scene.leave();
+        }
+
+        let specs = [];
+        if (text.toLowerCase() !== 'пропустить') {
+            const lines = text.split('\n');
+            for (const line of lines) {
+                if (line.includes(':')) {
+                    const [label, ...valueParts] = line.split(':');
+                    const value = valueParts.join(':'); // на случай, если в значении есть двоеточие
+                    if (label && value) {
+                        specs.push({ label: label.trim(), value: value.trim() });
+                    }
+                }
+            }
+        }
 
         try {
             const product = await Product.create({
@@ -71,13 +131,14 @@ const addProductScene = new Scenes.WizardScene(
                 name: ctx.wizard.state.name,
                 price: ctx.wizard.state.price,
                 description: ctx.wizard.state.description,
-                image: image,
+                image: ctx.wizard.state.image,
+                specs: specs.length > 0 ? JSON.stringify(specs) : null,
                 isActive: true
             });
-            await ctx.reply(`✅ Товар успешно добавлен!\nID: ${product.id}\nНазвание: ${product.name}`);
+            await ctx.reply(`✅ Товар успешно добавлен!\nID: ${product.id}\nНазвание: ${product.name}`, mainMenuAdmin);
         } catch (e) {
             console.error(e);
-            await ctx.reply('❌ Ошибка при добавлении товара в БД.');
+            await ctx.reply('❌ Ошибка при добавлении товара в БД.', mainMenuAdmin);
         }
         return ctx.scene.leave();
     }
@@ -90,3 +151,4 @@ addProductScene.action('cancel', async (ctx) => {
 });
 
 module.exports = { addProductScene };
+

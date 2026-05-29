@@ -11,7 +11,7 @@ const ConfiguratorCallout = () => {
       {/* Фон */}
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-20" 
-        style={{ backgroundImage: `url('https://images.unsplash.com/photo-1621252179027-94459d27d3ee?q=80&w=2000')` }}
+        style={{ backgroundImage: `url('/placeholder.jpg')` }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-[#0A2A2A] via-[#0A2A2A]/80 to-transparent" />
 

@@ -3,6 +3,7 @@ const router = express.Router();
 
 const ordersController = require('../controllers/ordersController');
 const catalogController = require('../controllers/catalogController');
+const referralController = require('../controllers/referralController');
 
 // --- ЗАКАЗЫ ---
 router.post('/orders', ordersController.createOrder);
@@ -18,6 +19,10 @@ router.get('/catalog/products', catalogController.getProducts);
 router.get('/catalog/reviews', catalogController.getReviews);
 router.post('/reviews', catalogController.createReview);
 router.get('/catalog/promo', catalogController.getPromoSettings);
+
+// --- РЕФЕРАЛЬНАЯ СИСТЕМА ---
+router.post('/referral/generate', referralController.generateReferralCode);
+router.post('/referral/validate', referralController.validateReferralCode);
 
 // --- ОБНОВЛЕНИЕ (для бота) ---
 router.put('/catalog/categories/:id', catalogController.updateCategory);

@@ -33,27 +33,42 @@ const features = [
   }
 ];
 
-// --- КОМПОНЕНТ СТАТИСТИКИ (GLASSMORPHISM) ---
+// --- КОМПОНЕНТ СТАТИСТИКИ (PREMIUM REDESIGN) ---
 const GlassStatCard = ({ number, text, delay }) => (
     <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, scale: 0.95, y: 40 }}
+        whileInView={{ opacity: 1, scale: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: delay, duration: 0.8, ease: "easeOut" }}
-        className="relative overflow-hidden rounded-2xl p-8 group"
+        className="relative group p-[1px] rounded-[2rem] overflow-hidden shadow-2xl"
     >
-        {/* Фон карточки: Матовое стекло */}
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-md border border-white/10 transition-all duration-500 group-hover:bg-white/10 group-hover:border-[#B88E2F]/50"></div>
+        {/* Анимированная рамка (светящийся градиент) */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#B88E2F]/10 via-[#B88E2F]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
         
-        {/* Блик при наведении */}
-        <div className="absolute -inset-full top-0 block h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-0 group-hover:animate-shine" />
+        {/* Внутренний фон */}
+        <div className="relative h-full w-full bg-gradient-to-b from-[#0f2e2e]/90 to-[#051F1F]/90 rounded-[31px] p-10 flex flex-col items-center justify-center overflow-hidden z-10 backdrop-blur-2xl border border-white/10 group-hover:border-[#B88E2F]/30 transition-all duration-500">
+            
+            {/* Шум/текстура для премиальности */}
+            <div className="absolute inset-0 opacity-10 mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] pointer-events-none"></div>
+            
+            {/* Блик */}
+            <div className="absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-[0.03] group-hover:animate-shine pointer-events-none" />
+            
+            {/* Декоративный круг свечения на фоне */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-[#B88E2F] rounded-full blur-[80px] opacity-10 group-hover:opacity-30 group-hover:scale-150 transition-all duration-700 pointer-events-none"></div>
 
-        <div className="relative z-10 flex flex-col items-center text-center">
-            <h3 className="text-6xl md:text-7xl font-serif font-bold text-[#B88E2F] mb-4 drop-shadow-xl">
+            <h3 className="relative z-20 text-6xl md:text-7xl font-serif font-medium text-transparent bg-clip-text bg-gradient-to-r from-white via-[#FFE5A0] to-[#B88E2F] pb-2 mb-2 drop-shadow-[0_10px_20px_rgba(184,142,47,0.3)]">
                 {number}
             </h3>
-            <div className="h-0.5 w-16 bg-[#B88E2F]/60 mb-4 transition-all duration-500 group-hover:w-24 group-hover:bg-[#B88E2F]"></div>
-            <p className="text-sm md:text-base uppercase tracking-[0.2em] text-gray-200 font-medium group-hover:text-white transition-colors">
+            
+            {/* Разделитель с точкой */}
+            <div className="relative z-20 flex items-center gap-4 mb-5 w-full justify-center">
+                <div className="h-[1px] w-12 bg-gradient-to-r from-transparent to-[#B88E2F]/50"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-[#B88E2F] shadow-[0_0_10px_#B88E2F] group-hover:scale-150 transition-transform duration-500"></div>
+                <div className="h-[1px] w-12 bg-gradient-to-l from-transparent to-[#B88E2F]/50"></div>
+            </div>
+            
+            <p className="relative z-20 text-xs md:text-sm uppercase tracking-[0.3em] text-gray-400 font-bold group-hover:text-white transition-colors duration-500 max-w-[200px] text-center">
                 {text}
             </p>
         </div>
@@ -62,8 +77,25 @@ const GlassStatCard = ({ number, text, delay }) => (
 
 const FeaturesGrid = () => {
   return (
-    <section className="bg-[#0A2A2A] text-white overflow-hidden">
+    <section className="relative bg-[#0A2A2A] text-white overflow-hidden">
       
+      {/* ФОНОВОЕ ИЗОБРАЖЕНИЕ С ЧЕРНО-БЕЛЫМ ФИЛЬТРОМ И МЯГКИМ ЗУМОМ НА ВЕСЬ БЛОК */}
+      <motion.div 
+         className="absolute inset-0 z-0 pointer-events-none"
+         initial={{ scale: 1.05 }}
+         whileInView={{ scale: 1 }}
+         transition={{ duration: 15, ease: "linear" }}
+      >
+         <img 
+             src="/placeholder.jpg" 
+             alt="Atmosphere" 
+             className="w-full h-full object-cover opacity-20 grayscale mix-blend-luminosity"
+         />
+         {/* Глубокий градиент для создания атмосферы премиальности */}
+         <div className="absolute inset-0 bg-gradient-to-t from-[#0A2A2A] via-[#0A2A2A]/80 to-[#0A2A2A]"></div>
+         <div className="absolute inset-0 bg-gradient-to-r from-[#051F1F] via-transparent to-[#051F1F] opacity-80"></div>
+      </motion.div>
+
       {/* 1. БЛОК ПРЕИМУЩЕСТВ (Сверху) */}
       <div className="py-24 container mx-auto px-4 relative z-10">
         <div className="text-center mb-20">
@@ -111,53 +143,21 @@ const FeaturesGrid = () => {
       </div>
 
       {/* 2. CINEMATIC БЛОК СТАТИСТИКИ (Снизу) */}
-      {/* Высокий блок с фотореалистичным фоном */}
-      <div className="relative w-full h-[600px] md:h-[500px] flex items-center justify-center overflow-hidden mt-10">
-         
-         {/* ФОНОВОЕ ИЗОБРАЖЕНИЕ (Заглушка - замени src на фото реального чана) */}
-         <motion.div 
-            className="absolute inset-0 z-0"
-            initial={{ scale: 1.1 }}
-            whileInView={{ scale: 1 }}
-            transition={{ duration: 10, ease: "linear" }} // Медленный зум (Cinematic effect)
-         >
-            {/* Я поставил качественное фото атмосферной спа-зоны. Сюда лучше всего встанет твое лучшее фото чана */}
-            <img 
-                src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1920&auto=format&fit=crop" 
-                alt="Atmosphere" 
-                className="w-full h-full object-cover opacity-60"
-            />
-            {/* Градиент поверх фото, чтобы текст читался */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0A2A2A] via-[#0A2A2A]/80 to-[#0A2A2A]/40"></div>
-         </motion.div>
+      <div className="relative w-full py-28 md:py-36 flex items-center justify-center overflow-hidden">
 
          {/* Контент поверх фото */}
          <div className="container mx-auto px-4 relative z-10 w-full">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16">
-                
-                <GlassStatCard 
-                    number="500+" 
-                    text="Реализованных проектов" 
-                    delay={0.2} 
-                />
-
-                <GlassStatCard 
-                    number="10 лет" 
-                    text="Опыта производства" 
-                    delay={0.4} 
-                />
-
-                <GlassStatCard 
-                    number="100%" 
-                    text="Довольных клиентов" 
-                    delay={0.6} 
-                />
-
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 max-w-5xl mx-auto">
+                <GlassStatCard number="500+" text="Реализованных проектов" delay={0.1} />
+                <GlassStatCard number="10 лет" text="Опыта производства" delay={0.3} />
+                <GlassStatCard number="100%" text="Довольных клиентов" delay={0.5} />
             </div>
          </div>
          
-         {/* Декоративная линия снизу */}
+         {/* Декоративная линия снизу с градиентом */}
          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#B88E2F]/50 to-transparent"></div>
+         {/* Декоративная линия сверху с градиентом */}
+         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#B88E2F]/20 to-transparent"></div>
       </div>
 
     </section>

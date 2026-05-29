@@ -21,6 +21,7 @@ const CustomProjectModal = ({ isOpen, onClose, categoryName = null }) => {
   const [touched, setTouched] = useState(false);
   const [errors, setErrors] = useState({});
   const [previews, setPreviews] = useState([]);
+  const [consent, setConsent] = useState(false);
 
   const [form, setForm] = useState({
     name: '',
@@ -36,6 +37,7 @@ const CustomProjectModal = ({ isOpen, onClose, categoryName = null }) => {
       setTouched(false);
       setErrors({});
       setPreviews([]);
+      setConsent(false);
       setForm({ name: '', phone: '+7', description: '', time: 'asap', files: [] });
     }
   }, [isOpen]);
@@ -100,6 +102,9 @@ const CustomProjectModal = ({ isOpen, onClose, categoryName = null }) => {
     if (data.phone.replace(/\D/g, '').length < 11) errs.phone = 'Введите полный номер';
     if (!data.description || data.description.trim().length < 10)
       errs.description = 'Опишите проект подробнее (минимум 10 символов)';
+    if (!consent) {
+      errs.consent = 'Необходимо согласие на обработку данных';
+    }
     return errs;
   };
 
@@ -163,9 +168,9 @@ const CustomProjectModal = ({ isOpen, onClose, categoryName = null }) => {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.92, opacity: 0, y: 24 }}
           transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#FDFBF7] rounded-3xl shadow-2xl border border-[#B88E2F]/20 custom-scrollbar"
+          className="relative w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col bg-[#FDFBF7] rounded-3xl shadow-2xl border border-[#B88E2F]/20"
         >
-          <div className="h-1.5 w-full bg-gradient-to-r from-[#0A2A2A] via-[#B88E2F] to-[#0A2A2A]" />
+          <div className="h-1.5 w-full shrink-0 bg-gradient-to-r from-[#0A2A2A] via-[#B88E2F] to-[#0A2A2A]" />
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-gray-400 hover:text-[#B88E2F] transition-colors p-1.5 rounded-full hover:bg-[#B88E2F]/10 z-10"
@@ -173,7 +178,7 @@ const CustomProjectModal = ({ isOpen, onClose, categoryName = null }) => {
             <X size={22} />
           </button>
 
-          <div className="p-8 pt-9">
+          <div className="p-8 pt-9 overflow-y-auto custom-scrollbar flex-1">
             {status === 'success' ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.85 }}
@@ -314,6 +319,32 @@ const CustomProjectModal = ({ isOpen, onClose, categoryName = null }) => {
                     )}
                   </div>
 
+                  {/* Чекбокс согласия */}
+                  <div className="flex items-start gap-3 mt-4">
+                    <div className="flex items-center h-5 mt-0.5">
+                      <input
+                        id="consent-custom"
+                        type="checkbox"
+                        checked={consent}
+                        onChange={(e) => setConsent(e.target.checked)}
+                        className={`w-5 h-5 rounded border-gray-300 text-[#B88E2F] focus:ring-[#B88E2F] cursor-pointer transition-colors ${
+                          touched && errors.consent ? 'border-red-500' : ''
+                        }`}
+                      />
+                    </div>
+                    <div className="text-xs text-gray-500 leading-tight text-left">
+                      <label htmlFor="consent-custom" className="cursor-pointer">
+                        Я даю согласие на обработку своих персональных данных в соответствии с{' '}
+                      </label>
+                      <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#B88E2F] hover:underline">
+                        политикой конфиденциальности
+                      </a>
+                      {touched && errors.consent && (
+                        <p className="text-red-500 mt-1">{errors.consent}</p>
+                      )}
+                    </div>
+                  </div>
+
                   <button type="submit" disabled={status === 'loading'}
                     className="w-full py-4 bg-[#B88E2F] hover:bg-[#A67C22] text-[#0A2A2A] font-bold rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 relative overflow-hidden group">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
@@ -322,10 +353,6 @@ const CustomProjectModal = ({ isOpen, onClose, categoryName = null }) => {
                       : <><Send size={18} /><span>{submitLabel}</span></>
                     }
                   </button>
-
-                  <p className="text-center text-[10px] text-gray-400">
-                    Нажимая кнопку, вы соглашаетесь на обработку персональных данных
-                  </p>
 
                   <div className="pt-4 border-t border-gray-100">
                     <p className="text-center text-xs text-gray-400 mb-3 uppercase tracking-widest">Или напишите нам напрямую</p>

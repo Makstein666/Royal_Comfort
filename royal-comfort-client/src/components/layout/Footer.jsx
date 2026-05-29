@@ -4,6 +4,15 @@ import { MapPin, Phone, Mail, Send, MessageCircle, ArrowRight } from 'lucide-rea
 import Logo from './Logo';
 import { useConfigurator } from '../../context/ConfiguratorContext';
 
+// Иконка Макс — стильная буква M
+const MaxIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" fillOpacity="0.12"/>
+    <path d="M6 17V7l6 7 6-7v10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const { openModal } = useConfigurator();
@@ -22,12 +31,13 @@ const Footer = () => {
 
   const contactInfo = {
     address: "Челябинская обл, Коркино, ул 1мая 64",
-    phoneDisplay: "+7 (925) 520-40-53",
-    phoneLink: "tel:+79255204053",
+    phoneDisplay: "+7 (933) 898-77-88",
+    phoneLink: "tel:+79338987788",
     email: "mr.cristov@mail.ru",
-    telegramLink: "https://t.me/John_Kristov",
-    telegramName: "@John_Kristov",
-    whatsappLink: "https://wa.me/79255204053"
+    telegramLink: "https://t.me/royal_comfort1",
+    telegramName: "@royal_comfort1",
+    whatsappLink: "https://wa.me/79338987788",
+    maxLink: "https://max.ru/u/f9LHodD0cOIaP6VEQ8R6vANhN5ifyiIsyqMYVa3wPSOsnnKMyZ9ZfK2m5Vg"
   };
 
   return (
@@ -46,12 +56,15 @@ const Footer = () => {
               Создаем уют и комфорт премиум-класса. Индивидуальные решения для вашего загородного отдыха.
             </p>
             
-            <div className="flex gap-4 mt-auto">
-              <a href={contactInfo.telegramLink} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#B88E2F] hover:text-[#051F1F] transition-all group">
+            <div className="flex gap-3 mt-auto">
+              <a href={contactInfo.telegramLink} target="_blank" rel="noreferrer" title="Telegram" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#B88E2F] hover:text-[#051F1F] transition-all group">
                 <Send size={18} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
               </a>
-              <a href={contactInfo.whatsappLink} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#B88E2F] hover:text-[#051F1F] transition-all group">
+              <a href={contactInfo.whatsappLink} target="_blank" rel="noreferrer" title="WhatsApp" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#B88E2F] hover:text-[#051F1F] transition-all group">
                 <MessageCircle size={18} className="group-hover:scale-110 transition-transform" />
+              </a>
+              <a href={contactInfo.maxLink} target="_blank" rel="noreferrer" title="Макс" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#B88E2F] hover:text-[#051F1F] transition-all group">
+                <MaxIcon size={18} />
               </a>
             </div>
           </div>
@@ -133,12 +146,9 @@ const Footer = () => {
             &copy; {currentYear} Royal Comfort. Все права защищены.
           </p>
           <div className="flex flex-wrap justify-center gap-6 order-1 md:order-2">
-            <a href="#" className="text-sm text-gray-400 hover:text-[#B88E2F] hover:underline underline-offset-4 transition-all">
-                Договор оферты
-            </a>
-            <a href="#" className="text-sm text-gray-400 hover:text-[#B88E2F] hover:underline underline-offset-4 transition-all">
+            <Link to="/privacy" onClick={() => window.scrollTo(0,0)} className="text-sm text-gray-400 hover:text-[#B88E2F] hover:underline underline-offset-4 transition-all">
                 Политика конфиденциальности
-            </a>
+            </Link>
           </div>
         </div>
       </div>

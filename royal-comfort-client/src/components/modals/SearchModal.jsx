@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, ChevronRight, ShoppingCart } from 'lucide-react';
-import { products } from '../../data/mockData'; // Импортируем базу товаров
 import { Link } from 'react-router-dom';
+import { useConfigurator } from '../../../context/ConfiguratorContext';
 
 const SearchModal = ({ isOpen, onClose }) => {
+  const { products } = useConfigurator();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
 
@@ -15,12 +16,17 @@ const SearchModal = ({ isOpen, onClose }) => {
       return;
     }
 
+    if (!products) {
+      setResults([]);
+      return;
+    }
+
     const filtered = products.filter(product => 
       product.name.toLowerCase().includes(query.toLowerCase()) ||
-      product.category.toLowerCase().includes(query.toLowerCase())
+      (product.categoryName && product.categoryName.toLowerCase().includes(query.toLowerCase()))
     );
     setResults(filtered);
-  }, [query]);
+  }, [query, products]);
 
   // Очистка при закрытии
   useEffect(() => {
@@ -96,7 +102,7 @@ const SearchModal = ({ isOpen, onClose }) => {
                             <h4 className="font-serif font-bold text-royal-900 group-hover:text-gold-600 transition-colors text-lg">
                                 {product.name}
                             </h4>
-                            <span className="text-xs text-gray-400 uppercase tracking-wide">{product.category}</span>
+                            <span className="text-xs text-gray-400 uppercase tracking-wide">{product.categoryName || 'Проект'}</span>
                         </div>
 
                         {/* Цена и стрелка */}

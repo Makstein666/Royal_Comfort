@@ -7,6 +7,7 @@ import Footer from './components/layout/Footer';
 import Home from './pages/Home';
 import Catalog from './pages/Catalog';
 import Tracking from './pages/Tracking';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 import GiftNotification from './components/modals/GiftNotification'; 
 
@@ -31,6 +32,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/catalog" element={<Catalog />} />
               <Route path="/tracking" element={<Tracking />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
             </Routes>
           </main>
 

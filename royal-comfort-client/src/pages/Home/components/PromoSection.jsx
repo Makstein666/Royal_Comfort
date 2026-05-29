@@ -5,15 +5,12 @@ import { Gift, Users, ArrowRight, Sparkles } from 'lucide-react';
 import { useConfigurator } from '../../../context/ConfiguratorContext'; 
 
 const PromoSection = () => {
-  // 2. ДОСТАЕМ ФУНКЦИЮ АКТИВАЦИИ
-  const { activateGift } = useConfigurator(); 
+  // 2. ДОСТАЕМ ФУНКЦИЮ АКТИВАЦИИ И ОТКРЫТИЯ МОДАЛКИ
+  const { activateGift, setIsReferralModalOpen } = useConfigurator();
 
   // --- ЛОГИКА ДЛЯ ПРАВОЙ КАРТОЧКИ (ПРИГЛАСИТЬ ДРУГА) ---
   const handleInviteFriend = () => {
-    const phoneNumber = "79774735760"; // Номер менеджера
-    const text = "Здравствуйте! Хочу порекомендовать друга и получить бонус 5000р.";
-    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank');
+    setIsReferralModalOpen(true);
   };
 
   // --- ЛОГИКА ДЛЯ ЛЕВОЙ КАРТОЧКИ ---
@@ -93,7 +90,7 @@ const PromoSection = () => {
               </p>
 
               <button className="flex items-center gap-3 text-[#0A2A2A] font-bold uppercase tracking-widest text-sm group-hover:gap-5 transition-all">
-                Написать менеджеру <ArrowRight size={18} />
+                Получить код <ArrowRight size={18} />
               </button>
             </div>
             

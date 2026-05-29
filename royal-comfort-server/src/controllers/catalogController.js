@@ -176,6 +176,7 @@ exports.createReview = async (req, res) => {
     try {
         const { orderId, rating, text, images } = req.body;
         const { Order, Product } = require('../models');
+        const { notifyAdminAboutNewReview } = require('../services/bot');
 
         if (!orderId || !rating || !text) {
             return res.status(400).json({ message: 'Заполните все обязательные поля' });
@@ -224,6 +225,9 @@ exports.createReview = async (req, res) => {
             date: new Date().toLocaleDateString('ru-RU'),
             isApproved: false // На модерацию
         });
+
+        // Отправляем уведомление админам
+        notifyAdminAboutNewReview(review).catch(e => console.error('Ошибка отправки уведомления:', e));
 
         res.status(201).json({ success: true, review });
     } catch (err) {

@@ -157,7 +157,7 @@ const Catalog = () => {
                     backgroundImage: `url(${
                         !isCategoryView && currentCategoryObj 
                             ? currentCategoryObj.image 
-                            : 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000' 
+                            : '/placeholder.jpg' 
                     })` 
                 }}
             />
@@ -165,7 +165,7 @@ const Catalog = () => {
             <div className={`absolute inset-0 bg-gradient-to-r via-[#0A2A2A]/80 to-transparent transition-colors duration-500
                 ${isFlagship ? 'from-[#0A2A2A]' : 'from-[#0A2A2A]/95'}
             `} />
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] opacity-20 mix-blend-overlay"></div>
+            <div className="absolute inset-0 bg-[url('/placeholder.jpg')] opacity-20 mix-blend-overlay"></div>
             
             {isFlagship && (
                 <div className="absolute inset-0 bg-gradient-to-t from-[#B88E2F]/10 to-transparent mix-blend-overlay pointer-events-none"></div>
@@ -223,10 +223,10 @@ const Catalog = () => {
                 {/* 1. ГЛАВНАЯ КАРТОЧКА (ЧАНЫ) */}
                 <div 
                     onClick={() => handleCategoryClick('tub')}
-                    className="col-span-1 md:col-span-2 lg:row-span-2 relative h-[500px] lg:h-auto rounded-[2.5rem] overflow-hidden cursor-pointer group shadow-2xl border border-[#B88E2F]/20 hover:border-[#B88E2F] transition-all duration-500"
+                    className="col-span-1 md:col-span-2 lg:row-span-2 relative h-[500px] lg:h-auto rounded-[2.5rem] overflow-hidden cursor-pointer group shadow-2xl border border-[#B88E2F]/20 hover:border-[#B88E2F] transition-all duration-500 isolate [transform:translateZ(0)]"
                 >
                     {/* Фон с картинкой */}
-                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-[2s] group-hover:scale-105" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?q=80&w=2070&auto=format&fit=crop')` }} />
+                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-[2s] group-hover:scale-105" style={{ backgroundImage: `url('/placeholder.jpg')` }} />
                     
                     {/* Градиенты */}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#051F1F] via-[#051F1F]/20 to-transparent opacity-90" />
@@ -260,9 +260,9 @@ const Catalog = () => {
                         <div
                             key={category.id}
                             onClick={() => setCustomProjectCategory('')}
-                            className="group relative h-[320px] rounded-[2rem] overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-2 bg-gradient-to-br from-[#0A2A2A] to-[#1a4040] shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(184,142,47,0.3)] border border-[#B88E2F]/30 hover:border-[#B88E2F]"
+                            className="group relative h-[320px] rounded-[2rem] overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-2 bg-gradient-to-br from-[#0A2A2A] to-[#1a4040] shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(184,142,47,0.3)] border border-[#B88E2F]/30 hover:border-[#B88E2F] isolate [transform:translateZ(0)]"
                         >
-                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] opacity-10 mix-blend-overlay" />
+                            <div className="absolute inset-0 bg-[url('/placeholder.jpg')] opacity-10 mix-blend-overlay" />
                             <div className="absolute top-0 right-0 w-48 h-48 bg-[#B88E2F]/10 rounded-full blur-[80px] pointer-events-none" />
                             <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#B88E2F]/10 rounded-full blur-[80px] pointer-events-none" />
                             <div className="absolute inset-0 p-8 flex flex-col justify-end items-start">
@@ -315,9 +315,9 @@ const Catalog = () => {
                         {currentCategoryId && (
                             <div 
                                 onClick={() => handleQuickOrder({ id: 'custom_card', category: currentCategoryId })}
-                                className="group relative bg-gradient-to-br from-[#0A2A2A] to-[#1a3a3a] rounded-[2rem] overflow-hidden cursor-pointer flex flex-col h-full min-h-[400px] md:min-h-[450px] items-center justify-center text-center p-6 md:p-8 border-2 border-[#B88E2F] hover:border-[#D4AF37] transition-all duration-500 shadow-[0_0_40px_rgba(184,142,47,0.2)] hover:shadow-[0_0_60px_rgba(184,142,47,0.4)] hover:-translate-y-2"
+                                className="group relative bg-gradient-to-br from-[#0A2A2A] to-[#1a3a3a] rounded-[2rem] overflow-hidden cursor-pointer flex flex-col h-full min-h-[400px] md:min-h-[450px] items-center justify-center text-center p-6 md:p-8 border-2 border-[#B88E2F] hover:border-[#D4AF37] transition-all duration-500 shadow-[0_0_40px_rgba(184,142,47,0.2)] hover:shadow-[0_0_60px_rgba(184,142,47,0.4)] hover:-translate-y-2 isolate [transform:translateZ(0)]"
                             >
-                                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] opacity-20 mix-blend-overlay"></div>
+                                <div className="absolute inset-0 bg-[url('/placeholder.jpg')] opacity-20 mix-blend-overlay"></div>
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-[#B88E2F]/10 rounded-full blur-[100px] pointer-events-none"></div>
                                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#B88E2F]/10 rounded-full blur-[100px] pointer-events-none"></div>
                                 

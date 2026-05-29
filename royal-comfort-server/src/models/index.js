@@ -7,22 +7,23 @@ const ConfigGroup = require('./ConfigGroup');
 const ConfigOption = require('./ConfigOption');
 const PromoSettings = require('./PromoSettings');
 const Admin = require('./Admin');
+const ReferralCode = require('./ReferralCode');
 
 
 // Связи товаров и категорий
-Category.hasMany(Product, { foreignKey: 'categoryId', as: 'products' });
-Product.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
+Category.hasMany(Product, { foreignKey: 'categoryId', as: 'products', onDelete: 'CASCADE' });
+Product.belongsTo(Category, { foreignKey: 'categoryId', as: 'category', onDelete: 'CASCADE' });
 
 // Связи отзывов
-Category.hasMany(Review, { foreignKey: 'categoryId', as: 'reviews' });
-Review.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
+Category.hasMany(Review, { foreignKey: 'categoryId', as: 'reviews', onDelete: 'CASCADE' });
+Review.belongsTo(Category, { foreignKey: 'categoryId', as: 'category', onDelete: 'CASCADE' });
 
 // Связи конфигуратора
-Category.hasMany(ConfigGroup, { foreignKey: 'categoryId', as: 'configGroups' });
-ConfigGroup.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
+Category.hasMany(ConfigGroup, { foreignKey: 'categoryId', as: 'configGroups', onDelete: 'CASCADE' });
+ConfigGroup.belongsTo(Category, { foreignKey: 'categoryId', as: 'category', onDelete: 'CASCADE' });
 
-ConfigGroup.hasMany(ConfigOption, { foreignKey: 'groupId', as: 'options' });
-ConfigOption.belongsTo(ConfigGroup, { foreignKey: 'groupId', as: 'group' });
+ConfigGroup.hasMany(ConfigOption, { foreignKey: 'groupId', as: 'options', onDelete: 'CASCADE' });
+ConfigOption.belongsTo(ConfigGroup, { foreignKey: 'groupId', as: 'group', onDelete: 'CASCADE' });
 
 module.exports = {
   sequelize,
@@ -33,5 +34,6 @@ module.exports = {
   ConfigGroup,
   ConfigOption,
   PromoSettings,
-  Admin
+  Admin,
+  ReferralCode
 };

@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom'; 
 import { 
   X, Check, Calculator, ArrowRight, Info, ChevronRight, LayoutGrid, PenTool, ArrowLeft, 
-  Phone, User, MessageSquare, Send, Smartphone, Clock, AtSign, Copy, ExternalLink, Edit2, AlertCircle 
+  Phone, User, MessageSquare, Send, Smartphone, Clock, AtSign, Copy, ExternalLink, Edit2, AlertCircle,
+  Droplet, Flame, TreePine, Sparkles, Home, Sun, Wind, Utensils
 } from 'lucide-react';
 import { useConfigurator } from '../../context/ConfiguratorContext';
 
@@ -42,6 +43,9 @@ const ConfiguratorModal = () => {
   
   // Состояние для анимации копирования
   const [isCopied, setIsCopied] = useState(false);
+  
+  // Согласие
+  const [consent, setConsent] = useState(false);
 
   const isInitialized = useRef(false);
 
@@ -73,6 +77,7 @@ const ConfiguratorModal = () => {
       setIsSubmitting(false);
       setOrderId(null);
       setIsCopied(false);
+      setConsent(false);
       setErrors({});
     }
   }, [isOpen, currentProduct]);
@@ -113,9 +118,32 @@ const ConfiguratorModal = () => {
     }
   }, [activeCategory, viewStep, isVerifying]);
 
-  const modalImage = activeCategory 
-    ? (currentProduct?.image || configData?.image || '/images/placeholder.png')
-    : 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=800'; 
+  // Абстрактный паттерн вместо скучной картинки
+  const renderAbstractPattern = () => {
+      let Icons = [Sparkles, TreePine, Flame];
+      
+      if (activeCategory === 'tub' || activeCategory === 'pool') {
+          Icons = [Droplet, Flame, TreePine, Sparkles];
+      } else if (activeCategory === 'gazebo' || activeCategory === 'bath') {
+          Icons = [Home, Sun, TreePine, Wind];
+      } else if (activeCategory === 'grill') {
+          Icons = [Flame, Utensils, Sparkles];
+      }
+
+      const Icon0 = Icons[0];
+      const Icon1 = Icons[1];
+      const Icon2 = Icons[2];
+      const Icon3 = Icons[3];
+
+      return (
+          <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none opacity-20 text-[#B88E2F]">
+              <Icon0 size={300} className="absolute -top-10 -left-10 rotate-12 drop-shadow-lg" />
+              <Icon1 size={400} className="absolute top-1/2 -right-32 -translate-y-1/2 -rotate-12 drop-shadow-lg" />
+              <Icon2 size={250} className="absolute -bottom-10 -left-10 rotate-45 drop-shadow-lg" />
+              {Icon3 && <Icon3 size={200} className="absolute top-20 right-10 -rotate-12 drop-shadow-lg" />}
+          </div>
+      );
+  }; 
 
   // --- ОБРАБОТЧИКИ ---
 
@@ -170,6 +198,10 @@ const ConfiguratorModal = () => {
           if (formData.phone.length < 3) newErrors.phone = "Некорректный никнейм";
       } else {
           if (formData.phone.length < 16) newErrors.phone = "Введите полный номер";
+      }
+
+      if (!consent) {
+          newErrors.consent = "Необходимо согласие на обработку данных";
       }
 
       setErrors(newErrors);
@@ -299,27 +331,19 @@ const ConfiguratorModal = () => {
           </div>
 
           {/* ЛЕВАЯ ЧАСТЬ */}
-          <div className="w-full md:w-5/12 bg-[#F0EFE9] relative flex flex-col md:justify-center p-6 md:p-10 shrink-0 overflow-hidden min-h-[160px] md:h-auto border-b md:border-b-0 md:border-r border-[#B88E2F]/10 pt-16 md:pt-10">
+          <div className="w-full md:w-5/12 bg-[#F0EFE9] relative flex flex-col justify-center p-6 md:p-10 shrink-0 overflow-hidden min-h-[160px] md:h-auto border-b md:border-b-0 md:border-r border-[#B88E2F]/10 pt-16 md:pt-10">
              <div className="absolute -top-10 -left-10 w-[200px] h-[200px] md:w-[600px] md:h-[600px] bg-[#B88E2F]/10 rounded-full blur-3xl pointer-events-none"></div>
              
-             {viewStep !== 'success' && (
-                 <motion.img 
-                   key={activeCategory || 'select'}
-                   initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
-                   src={modalImage}
-                   alt={modalTitle}
-                   className="hidden md:block relative z-10 max-w-full max-h-[50%] object-contain drop-shadow-xl rounded-xl mb-8"
-                 />
-             )}
+             {viewStep !== 'success' && renderAbstractPattern()}
 
-             <div className="relative z-20 mt-auto md:mt-0">
+             <div className="relative z-20 mt-auto md:mt-0 text-center md:text-left">
                 {activeCategory && viewStep !== 'choice' && (
-                   <span className="text-[#B88E2F] text-[10px] font-bold uppercase tracking-[0.25em] border border-[#B88E2F]/30 px-2 py-1 rounded mb-3 inline-block">
+                   <span className="text-[#B88E2F] text-[10px] md:text-xs font-bold uppercase tracking-[0.25em] border border-[#B88E2F]/30 px-3 py-1.5 rounded mb-4 inline-block bg-white/50 backdrop-blur-sm">
                       {categoryName}
                    </span>
                 )}
-                <h2 className="text-2xl md:text-4xl font-serif font-bold text-[#051F1F] max-w-md leading-tight">{modalTitle}</h2>
-                <p className="text-gray-500 text-xs md:text-sm mt-2 font-medium leading-relaxed">{modalSubtitle}</p>
+                <h2 className="text-3xl md:text-5xl font-serif font-bold text-[#051F1F] max-w-md leading-tight mb-2 md:mb-4 drop-shadow-sm">{modalTitle}</h2>
+                <p className="text-gray-500 text-sm md:text-base mt-2 font-medium leading-relaxed max-w-xs mx-auto md:mx-0">{modalSubtitle}</p>
              </div>
           </div>
 
@@ -332,12 +356,12 @@ const ConfiguratorModal = () => {
                 
                 {/* 1. КАТЕГОРИИ (ИСПРАВЛЕННАЯ СЕТКА) */}
                 {!activeCategory && (
-                    <div className="grid grid-cols-3 gap-3 w-full content-start">
+                    <div className="flex flex-wrap justify-center gap-3 w-full content-start">
                         {categories.filter(c => c.id !== 'custom' && c.isActive).map((cat) => (
                             <div 
                                 key={cat.id} 
                                 onClick={() => openModal(cat.id)} 
-                                className="p-3 border border-[#B88E2F]/10 rounded-2xl hover:border-[#B88E2F] hover:bg-white hover:shadow-md cursor-pointer transition-all flex flex-col items-center text-center gap-2 group bg-white/50"
+                                className="flex-1 min-w-[140px] max-w-[250px] p-3 border border-[#B88E2F]/10 rounded-2xl hover:border-[#B88E2F] hover:bg-white hover:shadow-md cursor-pointer transition-all flex flex-col items-center text-center gap-2 group bg-white/50"
                             >
                                 <div className="w-14 h-14 bg-gray-100 rounded-full bg-cover bg-center shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-300" style={{backgroundImage: `url(${cat.image})`}}></div>
                                 <div>
@@ -462,8 +486,12 @@ const ConfiguratorModal = () => {
                             <div className="relative overflow-hidden rounded-2xl bg-[#0A2A2A] text-white p-6 shadow-xl border border-[#B88E2F]/30 mt-6">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#B88E2F] rounded-full blur-[60px] opacity-20 pointer-events-none"></div>
                                 <div className="relative z-10 flex items-start gap-4">
-                                    <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center shrink-0 overflow-hidden border-2 border-[#B88E2F]">
-                                        <img src={activeGift.image} alt={activeGift.name} className="w-full h-full object-cover" />
+                                    <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center shrink-0 overflow-hidden border-2 border-[#B88E2F] text-[#B88E2F]">
+                                        {activeGift.image ? (
+                                            <img src={activeGift.image} alt={activeGift.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <Sparkles size={32} />
+                                        )}
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
@@ -485,11 +513,17 @@ const ConfiguratorModal = () => {
                         <form onSubmit={handlePreSubmit} className={`space-y-6 transition-all duration-300 ${isVerifying ? 'opacity-20 blur-sm pointer-events-none' : 'opacity-100'}`}>
                             
                             {/* Выбор метода */}
-                            <div className="grid grid-cols-3 gap-3 mb-6">
+                            <div className="grid grid-cols-4 gap-2 mb-6">
                                 {[
                                     { id: 'phone', label: 'Звонок', icon: <Phone size={20} /> },
                                     { id: 'whatsapp', label: 'WhatsApp', icon: <Smartphone size={20} /> },
                                     { id: 'telegram', label: 'Telegram', icon: <Send size={20} /> },
+                                    { id: 'max', label: 'Макс', icon: (
+                                        <svg width={20} height={20} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                          <rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" fillOpacity="0.12"/>
+                                          <path d="M6 17V7l6 7 6-7v10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    )},
                                 ].map((method) => (
                                     <div key={method.id} onClick={() => setContactMethod(method.id)} className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all cursor-pointer gap-2 h-20 ${contactMethod === method.id ? 'border-[#B88E2F] bg-[#B88E2F]/10 text-[#051F1F]' : 'border-gray-100 bg-white text-gray-400 hover:border-[#B88E2F]/30 hover:text-[#B88E2F]'}`}>
                                             {method.icon}<span className="text-[10px] uppercase font-bold tracking-wider">{method.label}</span>
@@ -559,6 +593,37 @@ const ConfiguratorModal = () => {
                                 <div className="relative z-10 pt-3 border-t border-white/10"><p className="text-[10px] text-gray-400">* Стоимость ориентировочная.</p></div>
                             </div>
 
+                            {/* Чекбокс согласия */}
+                            <div className="flex items-start gap-3 mt-4">
+                              <div className="flex items-center h-5 mt-0.5">
+                                <input
+                                  id="consent-config"
+                                  type="checkbox"
+                                  checked={consent}
+                                  onChange={(e) => {
+                                    setConsent(e.target.checked);
+                                    if (e.target.checked) {
+                                      setErrors(prev => ({ ...prev, consent: null }));
+                                    }
+                                  }}
+                                  className={`w-5 h-5 rounded border-gray-300 text-[#B88E2F] focus:ring-[#B88E2F] cursor-pointer transition-colors ${
+                                    errors.consent ? 'border-red-500' : ''
+                                  }`}
+                                />
+                              </div>
+                              <div className="text-xs text-gray-500 leading-tight text-left">
+                                <label htmlFor="consent-config" className="cursor-pointer">
+                                  Я даю согласие на обработку своих персональных данных в соответствии с{' '}
+                                </label>
+                                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#B88E2F] hover:underline">
+                                  политикой конфиденциальности
+                                </a>
+                                {errors.consent && (
+                                  <p className="text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={12}/> {errors.consent}</p>
+                                )}
+                              </div>
+                            </div>
+
                             <button type="submit" className="w-full py-4 bg-[#B88E2F] text-white font-bold rounded-xl hover:bg-[#D4AF37] transition-all flex items-center justify-center gap-3 shadow-lg">Продолжить <ArrowRight size={20} /></button>
                         </form>
 
@@ -573,7 +638,7 @@ const ConfiguratorModal = () => {
                                     
                                     <div className="space-y-3 mb-6 bg-gray-50 p-4 rounded-xl text-left">
                                         <div><p className="text-[10px] text-gray-400 uppercase tracking-widest">Имя</p><p className="font-bold text-[#051F1F] text-lg">{formData.name}</p></div>
-                                        <div><p className="text-[10px] text-gray-400 uppercase tracking-widest">Контакт ({contactMethod})</p><p className="font-bold text-[#B88E2F] text-xl">{formData.phone}</p></div>
+                                        <div><p className="text-[10px] text-gray-400 uppercase tracking-widest">Контакт ({contactMethod === 'max' ? 'Макс' : contactMethod})</p><p className="font-bold text-[#B88E2F] text-xl">{formData.phone}</p></div>
                                         <div><p className="text-[10px] text-gray-400 uppercase tracking-widest">Время</p><p className="font-medium text-[#051F1F]">{formData.preferredTime || 'В ближайшее время'}</p></div>
                                     </div>
 

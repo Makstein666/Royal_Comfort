@@ -3,7 +3,7 @@ import { useConfigurator } from '../../context/ConfiguratorContext';
 import { Check, ChevronLeft, X, Phone, User, Clock, MessageSquare } from 'lucide-react';
 
 const OrderForm = ({ onBack, onClose }) => {
-  const { configuration, totalPrice, configData } = useConfigurator();
+  const { configuration, totalPrice, configData, appliedReferralCode, setAppliedReferralCode } = useConfigurator();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -14,6 +14,7 @@ const OrderForm = ({ onBack, onClose }) => {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [consent, setConsent] = useState(false);
 
   // --- Форматирование телефона с автопрефиксом +7 ---
   const formatPhone = (raw) => {
@@ -54,6 +55,9 @@ const OrderForm = ({ onBack, onClose }) => {
     if (digits.length < 11) {
       errs.phone = 'Введите полный номер телефона (+7 и 10 цифр)';
     }
+    if (!consent) {
+      errs.consent = 'Необходимо согласие на обработку данных';
+    }
     // Комментарий — необязательный, не валидируем
     return errs;
   };
@@ -80,12 +84,16 @@ const OrderForm = ({ onBack, onClose }) => {
           productName: configData?.name || 'Индивидуальный заказ',
           totalPrice: totalPrice,
           configuration: configuration,
+          referralCode: appliedReferralCode // добавляем реферальный код
         })
       });
 
       if (response.ok) {
         const result = await response.json();
         alert(`✅ Заявка принята! Ваш номер заказа: ${result.orderId}`);
+        if (appliedReferralCode) {
+            setAppliedReferralCode(null); // очищаем код после успешного заказа
+        }
         if (onClose) onClose();
       } else {
         alert('Ошибка при отправке заявки. Попробуйте позже.');
@@ -268,6 +276,32 @@ const OrderForm = ({ onBack, onClose }) => {
               />
             </div>
           </div>
+
+          {/* Чекбокс согласия */}
+          <div className="flex items-start gap-3 mt-4">
+            <div className="flex items-center h-5 mt-0.5">
+              <input
+                id="consent-order"
+                type="checkbox"
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+                className={`w-5 h-5 rounded border-gray-300 text-[#B88E2F] focus:ring-[#B88E2F] cursor-pointer transition-colors ${
+                  touched && errors.consent ? 'border-red-500' : ''
+                }`}
+              />
+            </div>
+            <div className="text-xs text-gray-500 leading-tight">
+              <label htmlFor="consent-order" className="cursor-pointer">
+                Я даю согласие на обработку своих персональных данных в соответствии с{' '}
+              </label>
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#B88E2F] hover:underline">
+                политикой конфиденциальности
+              </a>
+              {touched && errors.consent && (
+                <p className="text-red-500 mt-1">{errors.consent}</p>
+              )}
+            </div>
+          </div>
         </form>
       </div>
 
@@ -282,9 +316,6 @@ const OrderForm = ({ onBack, onClose }) => {
           <Check size={20} />
           {isSubmitting ? 'Отправка...' : 'Подтвердить заказ'}
         </button>
-        <p className="text-center text-[10px] text-gray-400 mt-3">
-          Нажимая кнопку, вы соглашаетесь с политикой конфиденциальности
-        </p>
       </div>
     </div>
   );

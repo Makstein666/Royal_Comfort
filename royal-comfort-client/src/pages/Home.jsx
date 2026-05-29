@@ -12,6 +12,7 @@ import FeaturesGrid from './Home/components/FeaturesGrid';
 
 import ConfiguratorModal from '../components/modals/ConfiguratorModal';
 import CustomProjectModal from '../components/modals/CustomProjectModal';
+import ReferralModal from '../components/modals/ReferralModal';
 
 const Home = () => {
   const { hash } = useLocation();
@@ -68,6 +69,7 @@ const Home = () => {
 
       {/* МОДАЛЫ — рендерятся на уровне страницы, вне любых stacking context */}
       <ConfiguratorModal />
+      <ReferralModal />
 
       {/* Модал консультации для неактивных категорий */}
       <CustomProjectModal

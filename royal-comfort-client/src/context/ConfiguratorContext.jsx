@@ -22,11 +22,19 @@ export const ConfiguratorProvider = ({ children }) => {
   const [activeGift, setActiveGift] = useState(null);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
 
-  const [giftOptions, setGiftOptions] = useState({
-    tub: { name: 'Набор премиальных масел', price: 0, image: 'https://images.unsplash.com/photo-1608248597279-f99d160bfbc8?q=80&w=200' },
-    sauna: { name: 'Банный халат Royal', price: 0, image: 'https://images.unsplash.com/photo-1595345763945-3f33878e474d?q=80&w=200' },
-    default: { name: 'Секретный бонус', price: 0, image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=200' }
-  });
+  const [giftOptions, setGiftOptions] = useState({});
+
+  // Реферальная система
+  const [isReferralModalOpen, setIsReferralModalOpen] = useState(false);
+  const [appliedReferralCode, setAppliedReferralCode] = useState(() => localStorage.getItem('appliedReferralCode') || null);
+
+  useEffect(() => {
+    if (appliedReferralCode) {
+      localStorage.setItem('appliedReferralCode', appliedReferralCode);
+    } else {
+      localStorage.removeItem('appliedReferralCode');
+    }
+  }, [appliedReferralCode]);
 
   // --- Загрузка активных категорий и товаров из API ---
   useEffect(() => {
@@ -166,7 +174,9 @@ export const ConfiguratorProvider = ({ children }) => {
       categories, products,
       currentProduct, isLoading,
       checkCompatibility,
-      activeGift, activateGift, isGiftModalOpen
+      activeGift, activateGift, isGiftModalOpen,
+      isReferralModalOpen, setIsReferralModalOpen,
+      appliedReferralCode, setAppliedReferralCode
     }}>
       {children}
     </ConfiguratorContext.Provider>
