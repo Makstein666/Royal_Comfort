@@ -179,6 +179,10 @@ async function showOrderList(ctx, options = {}, isEdit = false) {
 async function getOrderDetailsText(order) {
     let info = `🆔 ${order.id}\n👤 ${order.clientName}\n📞 ${order.clientPhone}\n💬 Тип: ${order.type === 'consultation' ? 'Консультация' : 'Заказ'}\n📍 Статус: ${order.status}\n💰 Сумма: ${order.totalPrice ? order.totalPrice.toLocaleString() + ' ₽' : 'Не указана'}`;
     
+    if (order.gift) {
+        info += `\n🎁 Подарок: ${order.gift}`;
+    }
+    
     if (order.referralCode) {
         info += `\n🎁 Реф. код: ${order.referralCode}`;
         try {

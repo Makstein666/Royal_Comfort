@@ -53,8 +53,26 @@ exports.createOrder = async (req, res) => {
         }
 
         let finalConfig = configuration || {};
+        let finalGift = gift;
+
+        if (finalGift) {
+            const cleanClientPhone = clientPhone.replace(/\D/g, '');
+            if (cleanClientPhone.length >= 10) {
+                const pastOrderWithGift = await Order.findOne({
+                    where: {
+                        clientPhone: { [Op.like]: `%${cleanClientPhone}%` },
+                        gift: { [Op.not]: null }
+                    }
+                });
+                if (pastOrderWithGift) {
+                    finalGift = null;
+                    finalConfig.notes = (finalConfig.notes || '') + '\n\n⚠️ ВНИМАНИЕ: Заказ оформлен без подарка, так как клиент пытался получить его повторно.';
+                }
+            }
+        }
+
         if (notes || (referenceFiles && referenceFiles.length > 0)) {
-            finalConfig = { ...finalConfig, notes, referenceFiles };
+            finalConfig = { ...finalConfig, notes: (finalConfig.notes ? finalConfig.notes + '\n\n' + (notes || '') : notes), referenceFiles };
         }
 
         const newOrder = await Order.create({
@@ -69,7 +87,7 @@ exports.createOrder = async (req, res) => {
             productName,
             totalPrice,
             configuration: finalConfig,
-            gift,
+            gift: finalGift,
             referralCode,
             history: initialHistory
         });
@@ -86,7 +104,8 @@ exports.createOrder = async (req, res) => {
             totalPrice,
             referralCode,
             referralDetails: refDetails,
-            configuration: finalConfig
+            configuration: finalConfig,
+            gift: finalGift
         });
 
         res.status(201).json({ success: true, orderId: newId });
@@ -182,6 +201,10 @@ exports.searchOrdersByContact = async (req, res) => {
 
         if (!phone && !telegram) {
             return res.status(400).json({ message: 'Укажите телефон или Telegram' });
+        }
+        
+        if ((phone && phone.replace(/\D/g, '').length < 4) || (telegram && telegram.replace(/^@/, '').length < 3)) {
+             return res.status(400).json({ message: 'Слишком короткий запрос для поиска' });
         }
 
         const whereClause = {};

@@ -10,6 +10,7 @@ import Tracking from './pages/Tracking';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 
 import GiftNotification from './components/modals/GiftNotification'; 
+import TelegramWidget from './components/common/TelegramWidget';
 
 // ... импорты
 import { FontSizeProvider } from './context/FontSizeContext';
@@ -38,6 +39,7 @@ function App() {
 
           <Footer />
           <GiftNotification />
+          <TelegramWidget />
           
         </div>
     </FontSizeProvider>

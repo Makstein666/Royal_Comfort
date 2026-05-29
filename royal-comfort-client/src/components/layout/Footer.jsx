@@ -34,8 +34,8 @@ const Footer = () => {
     phoneDisplay: "+7 (933) 898-77-88",
     phoneLink: "tel:+79338987788",
     email: "mr.cristov@mail.ru",
-    telegramLink: "https://t.me/royal_comfort1",
-    telegramName: "@royal_comfort1",
+    telegramLink: "https://t.me/royal_comfort_bot",
+    telegramName: "@royal_comfort_bot",
     whatsappLink: "https://wa.me/79338987788",
     maxLink: "https://max.ru/u/f9LHodD0cOIaP6VEQ8R6vANhN5ifyiIsyqMYVa3wPSOsnnKMyZ9ZfK2m5Vg"
   };

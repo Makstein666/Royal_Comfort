@@ -21,6 +21,7 @@ export const ConfiguratorProvider = ({ children }) => {
   // Подарки
   const [activeGift, setActiveGift] = useState(null);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
+  const [hasUsedGift, setHasUsedGift] = useState(() => localStorage.getItem('hasUsedGift') === 'true');
 
   const [giftOptions, setGiftOptions] = useState({});
 
@@ -94,36 +95,47 @@ export const ConfiguratorProvider = ({ children }) => {
   };
 
   const activateGift = () => {
-    setActiveGift(giftOptions['default']);
+    if (hasUsedGift) {
+      alert('Вы уже получали комплимент к своему первому заказу!');
+      return;
+    }
+    const defaultGift = giftOptions['default'] || { name: 'Комплект премиальных масел', price: 0, image: '/images/maslo.png' };
+    setActiveGift(defaultGift);
     setIsGiftModalOpen(true);
     setTimeout(() => setIsGiftModalOpen(false), 3000);
   };
 
   useEffect(() => {
     if (activeGift && activeCategory) {
-      const specificGift = giftOptions[activeCategory] || giftOptions['default'];
-      setActiveGift(specificGift);
+      const specificGift = giftOptions[activeCategory] || giftOptions['default'] || { name: 'Комплект премиальных масел', price: 0, image: '/images/maslo.png' };
+      if (activeGift.name !== specificGift.name) {
+          setActiveGift(specificGift);
+      }
     }
-  }, [activeCategory]);
+  }, [activeCategory, activeGift, giftOptions]);
 
   // --- Открытие конфигуратора ---
   const openModal = async (categoryId, product = null) => {
-    setActiveCategory(categoryId);
+    setActiveCategory(categoryId || null);
     setCurrentProduct(product);
     setIsOpen(true);
 
-    const config = await loadConfigForCategory(categoryId);
-    if (config && config.groups.length > 0) {
-      const initialConfig = {};
-      config.groups.forEach(group => {
-        initialConfig[group.id] = group.options[0]?.id || null;
-      });
-      if (product && product.defaultConfig) {
-        Object.assign(initialConfig, product.defaultConfig);
-      }
-      setConfiguration(initialConfig);
+    if (categoryId) {
+        const config = await loadConfigForCategory(categoryId);
+        if (config && config.groups.length > 0) {
+          const initialConfig = {};
+          config.groups.forEach(group => {
+            initialConfig[group.id] = group.options[0]?.id || null;
+          });
+          if (product && product.defaultConfig) {
+            Object.assign(initialConfig, product.defaultConfig);
+          }
+          setConfiguration(initialConfig);
+        } else {
+          setConfiguration({});
+        }
     } else {
-      setConfiguration({});
+        setConfiguration({});
     }
   };
 
@@ -174,7 +186,7 @@ export const ConfiguratorProvider = ({ children }) => {
       categories, products,
       currentProduct, isLoading,
       checkCompatibility,
-      activeGift, activateGift, isGiftModalOpen,
+      activeGift, activateGift, isGiftModalOpen, hasUsedGift, setHasUsedGift,
       isReferralModalOpen, setIsReferralModalOpen,
       appliedReferralCode, setAppliedReferralCode
     }}>

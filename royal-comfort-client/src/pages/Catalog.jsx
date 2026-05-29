@@ -226,7 +226,7 @@ const Catalog = () => {
                     className="col-span-1 md:col-span-2 lg:row-span-2 relative h-[500px] lg:h-auto rounded-[2.5rem] overflow-hidden cursor-pointer group shadow-2xl border border-[#B88E2F]/20 hover:border-[#B88E2F] transition-all duration-500 isolate [transform:translateZ(0)]"
                 >
                     {/* Фон с картинкой */}
-                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-[2s] group-hover:scale-105" style={{ backgroundImage: `url('/placeholder.jpg')` }} />
+                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-[2s] group-hover:scale-105" style={{ backgroundImage: `url('/images/chan.jpg')` }} />
                     
                     {/* Градиенты */}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#051F1F] via-[#051F1F]/20 to-transparent opacity-90" />
@@ -244,7 +244,7 @@ const Catalog = () => {
                             Банные Чаны
                         </h3>
                         <p className="text-gray-300 text-lg mb-8 max-w-md font-light leading-relaxed">
-                            Флагманское направление. Кедр, лиственница и пищевая нержавеющая сталь.
+                            Флагманское направление. Лиственница класса А (без сучков) и пищевая нержавеющая сталь.
                         </p>
 
                         <button className="px-10 py-5 bg-[#B88E2F] text-[#051F1F] font-bold rounded-2xl hover:bg-white transition-all shadow-xl hover:shadow-2xl flex items-center gap-3 group-hover:pl-12 duration-300">

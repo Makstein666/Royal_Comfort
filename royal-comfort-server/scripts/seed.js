@@ -9,48 +9,48 @@ const { Category, ConfigGroup, ConfigOption, Product } = require('../src/models'
 const CATEGORIES = [
   {
     id: 'tub', name: 'Банные чаны', sortOrder: 1, isActive: true, basePrice: 100000,
-    description: 'Флагманское направление. Кедр, лиственница и пищевая нержавеющая сталь.',
-    image: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?q=80&w=1200'
+    description: 'Флагманское направление. Лиственница класса А (без сучков) и пищевая нержавеющая сталь.',
+    image: '/images/chan.jpg'
   },
   {
     id: 'sauna', name: 'Бани и сауны', sortOrder: 2, isActive: false,
     description: 'Индивидуальное проектирование и строительство бань под ключ.',
-    image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200'
+    image: '/images/banisauna.jpg'
   },
   {
     id: 'mangal', name: 'Мангальные зоны', sortOrder: 3, isActive: false,
     description: 'Премиальные мангалы и обустройство зон барбекю.',
-    image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1200'
+    image: '/images/mangal.jpg'
   },
   {
     id: 'gazebo', name: 'Беседки', sortOrder: 4, isActive: false,
     description: 'Уютные беседки из массива дерева.',
-    image: 'https://images.unsplash.com/photo-1590073844006-3a44a7f3ef95?q=80&w=1200'
+    image: '/images/besedki.jpg'
   },
   {
     id: 'kupel', name: 'Купели', sortOrder: 5, isActive: false,
     description: 'Классические купели для закаливания.',
-    image: 'https://images.unsplash.com/photo-1517036083033-93663673327d?q=80&w=1200'
+    image: '/images/kupeli.jpg'
   },
   {
     id: 'fireplace', name: 'Камины', sortOrder: 6, isActive: false,
     description: 'Уличные и интерьерные камины.',
-    image: 'https://images.unsplash.com/photo-1577456170107-5050355fc570?q=80&w=1200'
+    image: '/images/kamin.jpg'
   },
   {
     id: 'swing', name: 'Качели', sortOrder: 7, isActive: false,
     description: 'Садовые качели премиум-класса.',
-    image: 'https://images.unsplash.com/photo-1581446702206-8be956894002?q=80&w=1200'
+    image: '/images/kacheli.jpg'
   },
   {
     id: 'greenhouse', name: 'Теплицы', sortOrder: 8, isActive: false,
     description: 'Профессиональные теплицы с усиленным каркасом.',
-    image: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200'
+    image: '/images/teplica.jpg'
   },
   {
     id: 'pool', name: 'Бассейны', sortOrder: 9, isActive: false,
     description: 'Строительство и обслуживание бассейнов.',
-    image: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=1200'
+    image: '/images/basein.jpg'
   },
   {
     // Нет фото — карточка стилизована отдельно в Catalog.jsx как тёмный блок

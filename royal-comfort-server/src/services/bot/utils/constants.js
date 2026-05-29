@@ -1,16 +1,17 @@
-const ADMIN_IDS_CACHE = new Set([1078381605]); // Основной ID всегда в кэше
-const SUPER_ADMIN_USERNAMES = ['makste1n', 'John_Kristov']; // Суперадмины
+const ADMIN_IDS_CACHE = new Set([1078381605, 386165967]); // Основные ID всегда в кэше
+const SUPER_ADMIN_IDS = [1078381605, 386165967]; // Суперадмины (ID вместо юзернейма)
 
 /**
  * Проверка на права администратора.
  */
 const isAdmin = (ctx) => {
+    if (!ctx.from) return false;
     return ADMIN_IDS_CACHE.has(ctx.from.id);
 };
 
 const isSuperAdmin = (ctx) => {
-    if (!ctx.from.username) return false;
-    return SUPER_ADMIN_USERNAMES.includes(ctx.from.username);
+    if (!ctx.from) return false;
+    return SUPER_ADMIN_IDS.includes(ctx.from.id);
 };
 
 const addAdminToCache = (id) => {

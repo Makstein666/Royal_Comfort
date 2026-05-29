@@ -3,7 +3,7 @@ import { useConfigurator } from '../../context/ConfiguratorContext';
 import { Check, ChevronLeft, X, Phone, User, Clock, MessageSquare } from 'lucide-react';
 
 const OrderForm = ({ onBack, onClose }) => {
-  const { configuration, totalPrice, configData, appliedReferralCode, setAppliedReferralCode } = useConfigurator();
+  const { configuration, totalPrice, configData, appliedReferralCode, setAppliedReferralCode, activeGift, setHasUsedGift } = useConfigurator();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -84,7 +84,8 @@ const OrderForm = ({ onBack, onClose }) => {
           productName: configData?.name || 'Индивидуальный заказ',
           totalPrice: totalPrice,
           configuration: configuration,
-          referralCode: appliedReferralCode // добавляем реферальный код
+          referralCode: appliedReferralCode,
+          gift: activeGift ? activeGift.name : null
         })
       });
 
@@ -93,6 +94,10 @@ const OrderForm = ({ onBack, onClose }) => {
         alert(`✅ Заявка принята! Ваш номер заказа: ${result.orderId}`);
         if (appliedReferralCode) {
             setAppliedReferralCode(null); // очищаем код после успешного заказа
+        }
+        if (activeGift) {
+            localStorage.setItem('hasUsedGift', 'true');
+            setHasUsedGift(true);
         }
         if (onClose) onClose();
       } else {
@@ -169,6 +174,21 @@ const OrderForm = ({ onBack, onClose }) => {
               );
             })}
           </ul>
+          {activeGift && (
+            <div className="bg-[#B88E2F]/10 border border-[#B88E2F]/30 rounded-xl p-4 flex items-start gap-4 mb-4">
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0 border border-[#B88E2F]/50 shadow-sm text-[#B88E2F] overflow-hidden">
+                {activeGift.image ? (
+                  <img src={activeGift.image} alt={activeGift.name} className="w-full h-full object-cover" />
+                ) : (
+                  <Gift size={24} />
+                )}
+              </div>
+              <div>
+                <p className="text-sm font-bold text-[#0A2A2A]">{activeGift.name}</p>
+                <p className="text-xs text-gray-600 mt-1">Добавлен в качестве комплимента к вашему заказу</p>
+              </div>
+            </div>
+          )}
           <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
             <span className="text-lg font-bold text-royal-900">Итого к оплате:</span>
             <span className="text-2xl font-bold text-gold-600">{totalPrice.toLocaleString()} ₽</span>

@@ -361,12 +361,12 @@ const ConfiguratorModal = () => {
                             <div 
                                 key={cat.id} 
                                 onClick={() => openModal(cat.id)} 
-                                className="flex-1 min-w-[140px] max-w-[250px] p-3 border border-[#B88E2F]/10 rounded-2xl hover:border-[#B88E2F] hover:bg-white hover:shadow-md cursor-pointer transition-all flex flex-col items-center text-center gap-2 group bg-white/50"
+                                className="flex-1 min-w-[140px] max-w-[250px] p-4 border border-[#B88E2F]/10 rounded-3xl hover:border-[#B88E2F] hover:bg-white hover:shadow-lg cursor-pointer transition-all flex flex-col items-center text-center gap-3 group bg-white/50"
                             >
-                                <div className="w-14 h-14 bg-gray-100 rounded-full bg-cover bg-center shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-300" style={{backgroundImage: `url(${cat.image})`}}></div>
+                                <div className="w-20 h-20 md:w-28 md:h-28 bg-gray-100 rounded-full bg-cover bg-center shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-300" style={{backgroundImage: `url(${cat.image})`}}></div>
                                 <div>
-                                    <h4 className="font-bold text-[#051F1F] group-hover:text-[#B88E2F] transition-colors font-serif text-sm leading-tight">{cat.name}</h4>
-                                    <div className="w-6 h-0.5 bg-[#B88E2F]/20 mx-auto mt-1.5 rounded-full group-hover:w-10 group-hover:bg-[#B88E2F] transition-all"></div>
+                                    <h4 className="font-bold text-[#051F1F] group-hover:text-[#B88E2F] transition-colors font-serif text-base md:text-lg leading-tight">{cat.name}</h4>
+                                    <div className="w-8 h-1 bg-[#B88E2F]/20 mx-auto mt-2 rounded-full group-hover:w-12 group-hover:bg-[#B88E2F] transition-all"></div>
                                 </div>
                             </div>
                         ))}
@@ -393,11 +393,16 @@ const ConfiguratorModal = () => {
                 {activeCategory && viewStep === 'templates' && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {categoryProducts.map((prod) => (
-                            <div key={prod.id} onClick={() => handleChooseTemplate(prod)} className="group bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl hover:border-[#B88E2F]/50 transition-all cursor-pointer">
-                                <div className="h-32 bg-gray-100 bg-cover bg-center" style={{backgroundImage: `url(${prod.image})`}}></div>
-                                <div className="p-4">
-                                    <h4 className="font-serif font-bold text-[#051F1F] mb-1">{prod.name}</h4>
-                                    <span className="text-[#B88E2F] font-bold text-sm">от {prod.price.toLocaleString()} ₽</span>
+                            <div key={prod.id} onClick={() => handleChooseTemplate(prod)} className="group bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl hover:border-[#B88E2F]/50 transition-all cursor-pointer relative">
+                                <div className="h-40 bg-white bg-cover bg-center relative" style={{backgroundImage: `url(${prod.image})`}}>
+                                    {/* Рамка для скрытия черных краев фото и придания премиального вида */}
+                                    <div className="absolute inset-0 border-[8px] border-white pointer-events-none"></div>
+                                    <div className="absolute inset-2 border border-[#B88E2F]/10 rounded-xl pointer-events-none"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-50"></div>
+                                </div>
+                                <div className="p-5 pt-2 bg-white relative z-10">
+                                    <h4 className="font-serif font-bold text-[#051F1F] mb-1 text-lg">{prod.name}</h4>
+                                    <span className="text-[#B88E2F] font-bold text-sm tracking-wide">от {prod.price.toLocaleString()} ₽</span>
                                 </div>
                             </div>
                         ))}
@@ -446,8 +451,10 @@ const ConfiguratorModal = () => {
                                                 >
                                                     <div className="flex-1 flex items-center gap-4 pr-4">
                                                         {option.image && (
-                                                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-lg bg-gray-100 bg-cover bg-center shrink-0 border border-gray-200 group-hover/opt:border-[#B88E2F]/30 overflow-hidden" style={{ backgroundImage: `url(${option.image})` }}>
-                                                                <div className="w-full h-full bg-black/0 group-hover/opt:bg-black/10 transition-colors"></div>
+                                                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-lg bg-white bg-cover bg-center shrink-0 border border-gray-200 group-hover/opt:border-[#B88E2F]/30 overflow-hidden relative" style={{ backgroundImage: `url(${option.image})` }}>
+                                                                {/* Белая рамка для скрытия артефактов на краях */}
+                                                                <div className="absolute inset-0 border-[3px] border-white rounded-lg pointer-events-none"></div>
+                                                                <div className="w-full h-full bg-black/0 group-hover/opt:bg-black/10 transition-colors relative z-10"></div>
                                                             </div>
                                                         )}
                                                         <div>

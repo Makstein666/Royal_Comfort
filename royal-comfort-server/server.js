@@ -20,6 +20,10 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
+// Serve React App
+const clientBuildPath = path.join(__dirname, '../royal-comfort-client/dist');
+app.use(express.static(clientBuildPath));
+
 // --- Rate Limiting ---
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 минут
@@ -38,6 +42,10 @@ app.use('/api/orders', orderLimiter); // Строгий лимит на зака
 app.use('/api', apiLimiter); // Общий лимит на API
 app.use('/api', apiRoutes);
 
+// SPA Fallback: все неизвестные запросы направляем на index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientBuildPath, 'index.html'));
+});
 
 const PORT = process.env.PORT || 5000;
 

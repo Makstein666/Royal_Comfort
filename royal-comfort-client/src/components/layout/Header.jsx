@@ -4,6 +4,7 @@ import { Search, Menu, X, Truck, Phone, Type } from 'lucide-react'; // Доба�
 import { motion, AnimatePresence } from 'framer-motion';
 
 import ContactModal from '../modals/ContactModal'; 
+import CustomProjectModal from '../modals/CustomProjectModal';
 import Logo from './Logo';
 import { useConfigurator } from '../../context/ConfiguratorContext';
 import { useFontSize } from '../../context/FontSizeContext'; // 1. Импортируем контекст
@@ -12,6 +13,7 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [customProjectCategory, setCustomProjectCategory] = useState(null);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -65,6 +67,13 @@ const Header = () => {
   };
 
   const handleResultClick = (item) => {
+    if (item.type === 'category' && item.isActive === false) {
+       setCustomProjectCategory(item.name);
+       setShowDropdown(false);
+       setSearchQuery('');
+       setIsMobileMenuOpen(false);
+       return;
+    }
     setShowDropdown(false);
     setSearchQuery('');
     if (item.type === 'category') {
@@ -129,19 +138,21 @@ const Header = () => {
                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
                     className="absolute top-full left-0 w-full mt-2 bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100 z-[1001]"
                 >
-                    {searchResults.map((item) => (
+                    {searchResults.map((item) => {
+                        const isInactive = item.type === 'category' && item.isActive === false;
+                        return (
                         <div 
                             key={item.id + item.name}
                             onMouseDown={() => handleResultClick(item)}
-                            className="flex items-center gap-3 p-3 hover:bg-[#FDFBF7] cursor-pointer border-b border-gray-100 transition-colors last:border-0"
+                            className={`flex items-center gap-3 p-3 cursor-pointer border-b border-gray-100 transition-colors last:border-0 ${isInactive ? 'opacity-60 hover:bg-gray-50' : 'hover:bg-[#FDFBF7]'}`}
                         >
                             <div className="w-10 h-10 rounded-lg bg-gray-200 bg-cover bg-center" style={{ backgroundImage: `url(${item.image})` }}></div>
                             <div>
                                 <p className="text-[#0A2A2A] font-bold text-sm">{item.name}</p>
-                                <p className="text-[10px] text-gray-500 uppercase">{item.type === 'category' ? 'Категория' : 'Товар'}</p>
+                                <p className="text-[10px] text-gray-500 uppercase">{item.type === 'category' ? (isInactive ? 'В разработке' : 'Категория') : 'Товар'}</p>
                             </div>
                         </div>
-                    ))}
+                    )})}
                 </motion.div>
             )}
             </AnimatePresence>
@@ -225,12 +236,14 @@ const Header = () => {
                         
                         {searchResults.length > 0 && searchQuery && (
                             <div className="mt-2 bg-white rounded-xl overflow-hidden shadow-lg">
-                                {searchResults.slice(0,3).map(item => (
-                                    <div key={item.id} onMouseDown={() => handleResultClick(item)} className="p-3 border-b border-gray-200 text-[#0A2A2A] text-sm font-bold flex items-center gap-2">
+                                {searchResults.slice(0,3).map(item => {
+                                    const isInactive = item.type === 'category' && item.isActive === false;
+                                    return (
+                                    <div key={item.id} onMouseDown={() => handleResultClick(item)} className={`p-3 border-b border-gray-200 text-[#0A2A2A] text-sm font-bold flex items-center gap-2 ${isInactive ? 'opacity-60' : ''}`}>
                                         <div className="w-6 h-6 bg-gray-200 rounded bg-cover" style={{backgroundImage: `url(${item.image})`}}></div>
-                                        {item.name}
+                                        {item.name} {isInactive && <span className="text-[10px] text-[#B88E2F] ml-auto font-normal">Скоро</span>}
                                     </div>
-                                ))}
+                                )})}
                             </div>
                         )}
                     </div>
@@ -273,6 +286,11 @@ const Header = () => {
     </header>
     
     <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
+    <CustomProjectModal
+        isOpen={customProjectCategory !== null}
+        onClose={() => setCustomProjectCategory(null)}
+        categoryName={customProjectCategory}
+    />
     </>
   );
 };

@@ -24,8 +24,4 @@ router.get('/catalog/promo', catalogController.getPromoSettings);
 router.post('/referral/generate', referralController.generateReferralCode);
 router.post('/referral/validate', referralController.validateReferralCode);
 
-// --- ОБНОВЛЕНИЕ (для бота) ---
-router.put('/catalog/categories/:id', catalogController.updateCategory);
-router.put('/catalog/options/:id', catalogController.updateOption);
-
 module.exports = router;

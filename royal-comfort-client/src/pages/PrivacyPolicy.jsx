@@ -23,8 +23,8 @@ const PrivacyPolicy = () => {
             transition={{ delay: 0.1 }}
             className="text-4xl md:text-6xl font-serif font-bold text-[#0A2A2A] mb-6 leading-tight"
           >
-            Политика <br />
-            <span className="text-[#B88E2F]">конфиденциальности</span>
+            Политика в отношении <br />
+            <span className="text-[#B88E2F]">обработки персональных данных</span>
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -32,15 +32,14 @@ const PrivacyPolicy = () => {
             transition={{ delay: 0.2 }}
             className="text-gray-500 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
           >
-            Мы ценим ваше доверие и серьезно относимся к защите ваших личных данных.
-            В этом документе мы прозрачно описываем, как мы собираем, используем и защищаем вашу информацию.
+            Настоящая политика обработки персональных данных составлена в соответствии с требованиями Федерального закона от 27.07.2006. №152-ФЗ «О персональных данных».
           </motion.p>
         </div>
 
         {/* Content */}
         <div className="max-w-4xl mx-auto bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-[#B88E2F]/10">
           
-          <div className="prose prose-lg prose-[#0A2A2A] max-w-none">
+          <div className="prose prose-lg prose-[#0A2A2A] max-w-none text-gray-600">
             
             <p className="text-sm text-gray-400 mb-8 uppercase tracking-widest font-bold">
               Последнее обновление: {new Date().toLocaleDateString('ru-RU')}
@@ -49,21 +48,24 @@ const PrivacyPolicy = () => {
             <h2 className="text-2xl font-serif font-bold text-[#0A2A2A] mt-10 mb-4 flex items-center gap-3">
               <span className="text-[#B88E2F]">1.</span> Общие положения
             </h2>
-            <p className="text-gray-600 leading-relaxed mb-6">
-              Настоящая Политика конфиденциальности персональных данных (далее – Политика конфиденциальности) действует в отношении всей информации, которую интернет-магазин «Royal Comfort», расположенный на доменном имени royal-comfort.ru, может получить о Пользователе во время использования сайта интернет-магазина, программ и продуктов интернет-магазина.
+            <p className="leading-relaxed mb-6">
+              1.1. Настоящая политика обработки персональных данных определяет порядок обработки персональных данных и меры по обеспечению безопасности персональных данных ИП Кристова Галина Дмитриевна (далее – Оператор).<br/>
+              1.2. Оператор ставит своей важнейшей целью и условием осуществления своей деятельности соблюдение прав и свобод человека и гражданина при обработке его персональных данных, в том числе защиты прав на неприкосновенность частной жизни, личную и семейную тайну.<br/>
+              1.3. Настоящая политика Оператора применяется ко всей информации, которую Оператор может получить о посетителях веб-сайта <strong>https://royal-comfort-store.ru</strong>.
             </p>
 
             <h2 className="text-2xl font-serif font-bold text-[#0A2A2A] mt-10 mb-4 flex items-center gap-3">
-              <span className="text-[#B88E2F]">2.</span> Сбор и использование информации
+              <span className="text-[#B88E2F]">2.</span> Обрабатываемые данные
             </h2>
-            <p className="text-gray-600 leading-relaxed mb-4">
-              Мы собираем следующие данные при оформлении заказа или заполнении форм обратной связи:
+            <p className="leading-relaxed mb-4">
+              Оператор может обрабатывать следующие персональные данные Пользователя:
             </p>
-            <ul className="list-disc list-inside text-gray-600 space-y-2 mb-6 ml-4">
-              <li>Фамилия, Имя, Отчество</li>
-              <li>Контактный номер телефона</li>
-              <li>Адрес электронной почты (e-mail)</li>
-              <li>Адрес доставки Товара</li>
+            <ul className="list-disc list-inside space-y-2 mb-6 ml-4">
+              <li>Фамилия, имя, отчество;</li>
+              <li>Электронный адрес;</li>
+              <li>Номера телефонов;</li>
+              <li>Сообщения, направленные Пользователем через формы обратной связи для оформления заказа, уточнения деталей или получения консультаций по продукции;</li>
+              <li>Обезличенные данные о посетителях (в т.ч. файлы «cookie») с помощью сервисов интернет-статистики (Яндекс Метрика, Google Analytics и др.).</li>
             </ul>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-10">
@@ -72,8 +74,8 @@ const PrivacyPolicy = () => {
                      <Lock size={24} />
                   </div>
                   <div>
-                     <h4 className="font-bold text-[#0A2A2A] mb-2">Безопасность</h4>
-                     <p className="text-sm text-gray-500">Ваши данные передаются по защищенному протоколу и хранятся на защищенных серверах.</p>
+                     <h4 className="font-bold text-[#0A2A2A] mb-2">Надежность</h4>
+                     <p className="text-sm text-gray-500">Мы обеспечиваем сохранность данных и исключаем к ним доступ неуполномоченных лиц.</p>
                   </div>
                </div>
                <div className="bg-[#FDFBF7] p-6 rounded-2xl border border-gray-100 flex items-start gap-4">
@@ -81,31 +83,36 @@ const PrivacyPolicy = () => {
                      <Eye size={24} />
                   </div>
                   <div>
-                     <h4 className="font-bold text-[#0A2A2A] mb-2">Никакого спама</h4>
-                     <p className="text-sm text-gray-500">Мы не передаем ваши данные третьим лицам для рекламных рассылок.</p>
+                     <h4 className="font-bold text-[#0A2A2A] mb-2">Конфиденциальность</h4>
+                     <p className="text-sm text-gray-500">Данные никогда не передаются третьим лицам, за исключением случаев, предусмотренных законом.</p>
                   </div>
                </div>
             </div>
 
             <h2 className="text-2xl font-serif font-bold text-[#0A2A2A] mt-10 mb-4 flex items-center gap-3">
-              <span className="text-[#B88E2F]">3.</span> Цели сбора персональной информации
+              <span className="text-[#B88E2F]">3.</span> Цели обработки персональных данных
             </h2>
-            <p className="text-gray-600 leading-relaxed mb-4">
-              Персональные данные Пользователя Администрация сайта интернет-магазина может использовать в целях:
-            </p>
-            <ul className="list-disc list-inside text-gray-600 space-y-2 mb-6 ml-4">
-              <li>Идентификации Пользователя для оформления заказа и (или) заключения Договора купли-продажи.</li>
-              <li>Установления с Пользователем обратной связи, включая направление уведомлений, запросов, касающихся использования Сайта.</li>
-              <li>Определения места нахождения Пользователя для обеспечения безопасности, предотвращения мошенничества.</li>
-              <li>Подтверждения достоверности и полноты персональных данных.</li>
-              <li>Уведомления Пользователя Сайта о состоянии Заказа.</li>
+            <ul className="list-disc list-inside space-y-2 mb-6 ml-4">
+              <li>Информирование Пользователя посредством телефонных звонков и электронных писем;</li>
+              <li>Заключение, исполнение и прекращение гражданско-правовых договоров;</li>
+              <li>Предоставление доступа Пользователю к сервисам, информации и материалам, содержащимся на веб-сайте, а также уточнение деталей заказа;</li>
+              <li>Улучшение качества веб-сайта и его содержания (на основе обезличенных данных).</li>
             </ul>
 
             <h2 className="text-2xl font-serif font-bold text-[#0A2A2A] mt-10 mb-4 flex items-center gap-3">
-              <span className="text-[#B88E2F]">4.</span> Защита данных
+              <span className="text-[#B88E2F]">4.</span> Правовые основания обработки
             </h2>
-            <p className="text-gray-600 leading-relaxed mb-6">
-              Администрация сайта принимает необходимые организационные и технические меры для защиты персональной информации Пользователя от неправомерного или случайного доступа, уничтожения, изменения, блокирования, копирования, распространения, а также от иных неправомерных действий третьих лиц.
+            <p className="leading-relaxed mb-6">
+              Оператор обрабатывает персональные данные Пользователя только в случае их заполнения и/или отправки Пользователем самостоятельно через специальные формы на сайте. Заполняя формы, Пользователь выражает свое согласие с данной Политикой.
+            </p>
+
+            <h2 className="text-2xl font-serif font-bold text-[#0A2A2A] mt-10 mb-4 flex items-center gap-3">
+              <span className="text-[#B88E2F]">5.</span> Заключительные положения
+            </h2>
+            <p className="leading-relaxed mb-6">
+              5.1. Пользователь может получить любые разъяснения по интересующим вопросам, касающимся обработки его персональных данных, обратившись к Оператору с помощью электронной почты <strong>mr.cristov@mail.ru</strong> или по телефону <strong>8 (925) 520-40-53</strong>.<br/>
+              5.2. Ответственным лицом за организацию обработки персональных данных является <strong>Кристов Иван Иванович</strong>.<br/>
+              5.3. Актуальная версия Политики в свободном доступе расположена в сети Интернет по адресу <strong>https://royal-comfort-store.ru/privacy</strong>.
             </p>
 
             <div className="bg-[#0A2A2A] text-white p-8 rounded-2xl mt-12 mb-8 relative overflow-hidden">

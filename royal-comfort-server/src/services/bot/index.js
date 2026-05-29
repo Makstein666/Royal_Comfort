@@ -203,6 +203,10 @@ const notifyAdminAboutNewOrder = async (orderId, orderDetails) => {
                    `💰 Сумма: ${orderDetails.totalPrice ? orderDetails.totalPrice.toLocaleString() + ' ₽' : 'По расчету'}\n`;
     }
     
+    if (orderDetails.gift) {
+        message += `🎁 Подарок: ${orderDetails.gift}\n`;
+    }
+    
     if (orderDetails.configuration && orderDetails.configuration.notes) {
         message += `\n📝 **Комментарий:**\n_${orderDetails.configuration.notes}_\n`;
         if (orderDetails.configuration.referenceFiles && orderDetails.configuration.referenceFiles.length > 0) {

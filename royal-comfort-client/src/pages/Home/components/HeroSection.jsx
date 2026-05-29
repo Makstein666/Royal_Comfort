@@ -21,14 +21,14 @@ const HeroSection = () => {
             loop 
             muted 
             playsInline 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover scale-[1.10]"
           >
-            <source src="/videos/hero.mp4" type="video/mp4" />
+            <source src="/general-enhanced.mp4" type="video/mp4" />
           </video>
         </div>
         
-        {/* Затемнение 40% */}
-        <div className="absolute inset-0 bg-black/40 z-10" />
+        {/* Затемнение 60% */}
+        <div className="absolute inset-0 bg-black/60 z-10" />
         {/* Градиент снизу */}
         <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-black/70 to-transparent z-10" />
       </div>

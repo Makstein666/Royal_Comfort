@@ -17,7 +17,6 @@ const PromoSection = () => {
   const handleGetGift = () => {
     // 3. ВЫЗЫВАЕМ ФУНКЦИЮ ВМЕСТО СКРОЛЛА
     activateGift(); 
-    console.log("Подарок активирован!");
   };
 
   return (

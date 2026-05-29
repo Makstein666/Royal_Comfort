@@ -39,7 +39,8 @@ const listBackups = () => {
  * ВНИМАНИЕ: Процесс завершится для перезагрузки!
  */
 const restoreBackup = async (filename) => {
-    const srcPath = path.join(BACKUPS_DIR, filename);
+    const safeFilename = path.basename(filename);
+    const srcPath = path.join(BACKUPS_DIR, safeFilename);
     if (!fs.existsSync(srcPath)) throw new Error('Файл не найден');
 
     return new Promise((resolve, reject) => {
