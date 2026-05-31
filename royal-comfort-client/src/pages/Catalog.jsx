@@ -110,8 +110,12 @@ const Catalog = () => {
   };
 
   const handleQuickOrder = (arg1, arg2, arg3) => { 
-      if (typeof arg1 === 'object' && arg1.id === 'custom_card') {
-          openModal(arg1.category, null); 
+      if (typeof arg1 === 'object' && arg1 !== null) {
+          if (arg1.id === 'custom_card') {
+              openModal(arg1.category, null); 
+              return;
+          }
+          openModal(arg1.categoryId, arg1);
           return;
       }
       const categoryId = arg1; 

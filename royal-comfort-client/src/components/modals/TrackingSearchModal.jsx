@@ -68,7 +68,7 @@ const TrackingSearchModal = ({ isOpen, onClose }) => {
               params.set('telegram', contactValue);
           }
 
-          const response = await fetch(`http://localhost:5000/api/orders/search?${params.toString()}`);
+          const response = await fetch(`/api/orders/search?${params.toString()}`);
 
           if (response.status === 404) {
               // Заказы не найдены — показываем пустой массив

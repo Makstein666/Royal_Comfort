@@ -76,7 +76,7 @@ const Tracking = () => {
 
   // Загружаем активные заявки при открытии страницы
   useEffect(() => {
-      fetch('http://localhost:5000/api/orders/active')
+      fetch('/api/orders/active')
           .then(res => {
               if (!res.ok) throw new Error('Ошибка сети');
               return res.json();
@@ -103,7 +103,7 @@ const Tracking = () => {
     setOrderId(idToCheck); 
 
     try {
-        const response = await fetch(`http://localhost:5000/api/orders/${idToCheck}`);
+        const response = await fetch(`/api/orders/${idToCheck}`);
         
         if (!response.ok) {
             const errData = await response.json();

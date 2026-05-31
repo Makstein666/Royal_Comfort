@@ -9,7 +9,7 @@ const ReviewsSection = ({ categoryId, onLeaveReview }) => {
         const fetchReviews = async () => {
             try {
                 // Запрашиваем отзывы для конкретной категории
-                const res = await fetch(`http://localhost:5000/api/catalog/reviews?categoryId=${categoryId}`);
+                const res = await fetch(`/api/catalog/reviews?categoryId=${categoryId}`);
                 const data = await res.json();
                 if (Array.isArray(data)) {
                     setReviews(data);

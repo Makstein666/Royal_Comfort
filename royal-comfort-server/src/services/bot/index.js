@@ -104,13 +104,18 @@ setupAdminHandlers(bot);
 bot.hears(/Связь с менеджером/i, (ctx) => {
     ctx.reply(
         '📞 Телефон: +7 (933) 898-77-88\n' +
-        'Telegram: @royal_comfort1\n' +
-        'Макс: https://max.ru/u/f9LHodD0cOIaP6VEQ8R6vANhN5ifyiIsyqMYVa3wPSOsnnKMyZ9ZfK2m5Vg'
+        'Telegram: https://t.me/royal_comfort1\n' +
+        'Макс: https://max.ru/+79338987788'
     );
 });
 
 bot.hears(/Каталог проектов/i, (ctx) => {
-    ctx.reply('🌐 Наш полный каталог доступен на сайте: https://royalcomfort.ru');
+    ctx.reply(
+        '🌐 Полный каталог товаров на нашем сайте:',
+        Markup.inlineKeyboard([
+            [Markup.button.url('Открыть каталог', 'https://royal-comfort-store.ru/catalog?sort=popular')]
+        ])
+    );
 });
 
 bot.hears(/Проверить статус заказа/i, (ctx) => {
@@ -120,6 +125,11 @@ bot.hears(/Проверить статус заказа/i, (ctx) => {
 bot.hears(/Оставить отзыв/i, (ctx) => {
     ctx.scene.enter('ADD_REVIEW_SCENE');
 });
+
+bot.hears(/Отмена/i, (ctx) => {
+    ctx.reply('Отменено.', isAdmin(ctx) ? mainMenuAdmin : mainMenuClient);
+});
+
 
 // Обработка текстового ввода для Админа (поиск и прочее)
 bot.on('text', async (ctx) => {
@@ -165,7 +175,7 @@ bot.on('text', async (ctx) => {
     }
 });
 
-const launchBot = async () => {
+const launchBot = async (expressApp) => {
     try {
         console.log('🤖 Инициализация бота...');
         
@@ -174,12 +184,16 @@ const launchBot = async () => {
         dbAdmins.forEach(a => addAdminToCache(a.telegramId));
         console.log(`👥 Загружено админов из БД: ${dbAdmins.length}`);
 
-        bot.launch().then(() => {
+        const DOMAIN = process.env.DOMAIN || 'royal-comfort-store.ru';
+        const WEBHOOK_PATH = `/bot${process.env.BOT_TOKEN}`;
+        const WEBHOOK_URL = `https://${DOMAIN}${WEBHOOK_PATH}`;
 
-            console.log('✅ 🤖 БОТ ЗАПУЩЕН И ГОТОВ К РАБОТЕ!');
-        }).catch(err => {
-            console.error('❌ Ошибка при bot.launch():', err);
-        });
+        // Регистрируем webhook маршрут в Express
+        expressApp.use(bot.webhookCallback(WEBHOOK_PATH));
+
+        // Устанавливаем webhook в Telegram
+        await bot.telegram.setWebhook(WEBHOOK_URL);
+        console.log(`✅ 🤖 БОТ ЗАПУЩЕН ЧЕРЕЗ WEBHOOK: ${WEBHOOK_URL}`);
     } catch (err) {
         console.error('❌ Ошибка в launchBot:', err);
     }

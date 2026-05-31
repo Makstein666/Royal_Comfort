@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const ConfiguratorContext = createContext();
 export const useConfigurator = () => useContext(ConfiguratorContext);
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = '/api';
 
 export const ConfiguratorProvider = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -125,10 +125,20 @@ export const ConfiguratorProvider = ({ children }) => {
         if (config && config.groups.length > 0) {
           const initialConfig = {};
           config.groups.forEach(group => {
-            initialConfig[group.id] = group.options[0]?.id || null;
+            const isMultiple = group.type === 'multiple' || group.id.endsWith('extras');
+            const defaultOpt = group.options[0]?.id || null;
+            initialConfig[group.id] = isMultiple ? (defaultOpt ? [defaultOpt] : []) : defaultOpt;
           });
           if (product && product.defaultConfig) {
-            Object.assign(initialConfig, product.defaultConfig);
+            Object.keys(product.defaultConfig).forEach(key => {
+              const val = product.defaultConfig[key];
+              const isMultiple = key.endsWith('extras') || (config.groups.find(g => g.id === key)?.type === 'multiple');
+              if (isMultiple) {
+                initialConfig[key] = Array.isArray(val) ? val : (val ? [val] : []);
+              } else {
+                initialConfig[key] = val;
+              }
+            });
           }
           setConfiguration(initialConfig);
         } else {
@@ -146,7 +156,41 @@ export const ConfiguratorProvider = ({ children }) => {
   };
 
   const updateOption = (groupId, optionId) => {
-    setConfiguration(prev => ({ ...prev, [groupId]: optionId }));
+    setConfiguration(prev => {
+      const config = configDataMap[activeCategory];
+      const group = config?.groups.find(g => g.id === groupId);
+      const isMultiple = group?.type === 'multiple' || groupId.endsWith('extras');
+      
+      if (!isMultiple) {
+        return { ...prev, [groupId]: optionId };
+      }
+      
+      const currentSelection = prev[groupId];
+      let newSelection = Array.isArray(currentSelection) ? [...currentSelection] : [];
+      
+      // Если выбран сброс/ничего (id оканчивается на _none или равен 'none'/'ext_none')
+      if (optionId.endsWith('_none') || optionId === 'none' || optionId === 'ext_none') {
+        return { ...prev, [groupId]: [optionId] };
+      }
+      
+      // Иначе убираем опцию сброса, если она была в списке
+      newSelection = newSelection.filter(id => !id.endsWith('_none') && id !== 'none' && id !== 'ext_none');
+      
+      if (newSelection.includes(optionId)) {
+        newSelection = newSelection.filter(id => id !== optionId);
+        // Если ничего не осталось, возвращаем опцию "Ничего"
+        if (newSelection.length === 0) {
+          const noneOpt = group?.options.find(o => o.id.endsWith('_none') || o.id === 'none' || o.id === 'ext_none');
+          if (noneOpt) {
+            newSelection = [noneOpt.id];
+          }
+        }
+      } else {
+        newSelection.push(optionId);
+      }
+      
+      return { ...prev, [groupId]: newSelection };
+    });
   };
 
   // --- Расчёт цены ---
@@ -157,9 +201,16 @@ export const ConfiguratorProvider = ({ children }) => {
 
     let price = config.basePrice || 0;
     config.groups.forEach(group => {
-      const selectedId = configuration[group.id];
-      const selectedOpt = group.options.find(o => o.id === selectedId);
-      if (selectedOpt) price += selectedOpt.price;
+      const selectedVal = configuration[group.id];
+      if (Array.isArray(selectedVal)) {
+        selectedVal.forEach(id => {
+          const opt = group.options.find(o => o.id === id);
+          if (opt) price += opt.price;
+        });
+      } else {
+        const opt = group.options.find(o => o.id === selectedVal);
+        if (opt) price += opt.price;
+      }
     });
 
     // Применяем скидку категории если есть

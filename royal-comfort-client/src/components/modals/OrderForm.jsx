@@ -71,7 +71,7 @@ const OrderForm = ({ onBack, onClose }) => {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('http://localhost:5000/api/orders', {
+      const response = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -113,8 +113,8 @@ const OrderForm = ({ onBack, onClose }) => {
 
   const getSelectedOptionName = (group) => {
     const selectedId = configuration[group.id];
-    if (group.type === 'multiple') {
-      if (!selectedId || selectedId.length === 0) return null;
+    if (group.type === 'multiple' || group.id.endsWith('extras')) {
+      if (!selectedId || !Array.isArray(selectedId) || selectedId.length === 0) return null;
       return selectedId.map(id => {
         const opt = group.options.find(o => o.id === id);
         return opt ? opt.name : null;

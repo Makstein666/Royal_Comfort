@@ -4,6 +4,9 @@
  * and launches the Telegram bot for administrative notifications.
  */
 require('dotenv').config();
+// Принудительно используем IPv4 для всех исходящих соединений (Telegram API)
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -16,8 +19,10 @@ const { launchBot } = require('./src/services/bot'); // <--- ИЗМЕНЕНО
 const app = express();
 
 // --- Middleware Setup ---
+app.set('trust proxy', 1); // Доверяем Nginx reverse proxy
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Serve React App
@@ -38,7 +43,7 @@ const orderLimiter = rateLimit({
 });
 
 // --- Routes Setup ---
-app.use('/api/orders', orderLimiter); // Строгий лимит на заказы
+app.post('/api/orders', orderLimiter); // Строгий лимит ТОЛЬКО на создание заказов
 app.use('/api', apiLimiter); // Общий лимит на API
 app.use('/api', apiRoutes);
 
@@ -78,9 +83,9 @@ async function startApplication() {
       console.log(`🚀 Сервер запущен на порту ${PORT}`);
     });
 
-    // 3. Start Telegram Bot
+    // 3. Start Telegram Bot (Webhook mode - Telegram pushes updates to us)
     console.log('⏳ Запускаем Telegram бота...');
-    launchBot(); 
+    launchBot(app); 
   } catch (err) {
     console.error('❌ Ошибка инициализации приложения:', err);
   }

@@ -130,11 +130,15 @@ async function saveReviewAndNotify(ctx) {
         const { order, rating, text, images } = ctx.wizard.state;
         
         // Определяем категорию
-        let categoryId = order.productId;
-        const category = await Category.findByPk(order.productId);
-        if (!category) {
-            const product = await Product.findByPk(order.productId);
-            if (product) categoryId = product.categoryId;
+        let categoryId = null;
+        if (order.productId) {
+            const category = await Category.findByPk(order.productId);
+            if (!category) {
+                const product = await Product.findByPk(order.productId);
+                if (product) categoryId = product.categoryId;
+            } else {
+                categoryId = category.id;
+            }
         }
 
         const review = await Review.create({

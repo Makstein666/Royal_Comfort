@@ -234,7 +234,7 @@ const ConfiguratorModal = () => {
     };
 
     try {
-        const response = await fetch('http://localhost:5000/api/orders', {
+        const response = await fetch('/api/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderPayload),
@@ -437,8 +437,10 @@ const ConfiguratorModal = () => {
                                     </div>
                                     <div className="space-y-3">
                                         {group.options.map((option) => {
-                                            const isSelected = configuration[group.id] === option.id;
-                                            const isDisabled = isLocked && !isSelected;
+                                             const isSelected = Array.isArray(configuration[group.id])
+                                                ? configuration[group.id].includes(option.id)
+                                                : configuration[group.id] === option.id;
+                                             const isDisabled = isLocked && !isSelected;
                                             
                                             return (
                                                 <div 

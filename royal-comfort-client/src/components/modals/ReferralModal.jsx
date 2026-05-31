@@ -48,7 +48,7 @@ const ReferralModal = () => {
     }
     
     try {
-      const res = await fetch('http://localhost:5000/api/referral/generate', {
+      const res = await fetch('/api/referral/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone })
@@ -74,7 +74,7 @@ const ReferralModal = () => {
     }
     
     try {
-      const res = await fetch('http://localhost:5000/api/referral/validate', {
+      const res = await fetch('/api/referral/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: friendCode })

@@ -85,16 +85,39 @@ const setupOrdersHandlers = (bot) => {
         } catch (e) { ctx.answerCbQuery('Ошибка'); }
     });
 
-    bot.action(/set_(.+)_(.+)/, async (ctx) => {
+    bot.action(/set_(.+?)_(.+)/, async (ctx) => {
         const id = ctx.match[1];
         const newStatus = ctx.match[2];
         try {
-            await Order.update({ status: newStatus }, { where: { id } });
-            await ctx.answerCbQuery(`✅ Статус: ${newStatus}`);
             const order = await Order.findByPk(id);
-            if (!order) return;
-            const info = await getOrderDetailsText(order);
-            await ctx.editMessageText(info, Markup.inlineKeyboard(getOrderButtons(order)));
+            if (!order) return ctx.answerCbQuery('Заказ не найден');
+
+            // Добавляем запись в историю
+            let history = [];
+            if (Array.isArray(order.history)) {
+                history = [...order.history];
+            } else if (typeof order.history === 'string') {
+                try {
+                    history = JSON.parse(order.history);
+                } catch (e) {
+                    history = [];
+                }
+            }
+            
+            history.push({
+                title: newStatus,
+                date: new Date().toLocaleDateString('ru-RU')
+            });
+
+            await Order.update(
+                { status: newStatus, history: history },
+                { where: { id } }
+            );
+            await ctx.answerCbQuery(`✅ Статус: ${newStatus}`);
+            const updatedOrder = await Order.findByPk(id);
+            if (!updatedOrder) return;
+            const info = await getOrderDetailsText(updatedOrder);
+            await ctx.editMessageText(info, Markup.inlineKeyboard(getOrderButtons(updatedOrder)));
         } catch (e) {
             console.error('Ошибка при смене статуса:', e);
             ctx.answerCbQuery('❌ Ошибка при смене статуса').catch(() => {});

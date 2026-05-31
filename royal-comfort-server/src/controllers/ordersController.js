@@ -21,8 +21,17 @@ exports.createOrder = async (req, res) => {
         if (!clientName || clientName.trim().length < 2) {
             return res.status(400).json({ success: false, message: "Некорректное имя клиента" });
         }
-        if (!clientPhone || clientPhone.replace(/\D/g, '').length < 10) {
-            return res.status(400).json({ success: false, message: "Некорректный номер телефона" });
+        if (!clientPhone || clientPhone.trim().length === 0) {
+            return res.status(400).json({ success: false, message: "Контактные данные не заполнены" });
+        }
+        if (!contactMethod || contactMethod === 'phone' || contactMethod === 'whatsapp') {
+            if (clientPhone.replace(/\D/g, '').length < 10) {
+                return res.status(400).json({ success: false, message: "Некорректный номер телефона" });
+            }
+        } else if (contactMethod === 'telegram') {
+            if (clientPhone.replace(/^@/, '').trim().length < 3) {
+                return res.status(400).json({ success: false, message: "Некорректный Telegram никнейм" });
+            }
         }
         if (totalPrice !== undefined && (isNaN(totalPrice) || totalPrice < 0)) {
             return res.status(400).json({ success: false, message: "Некорректная сумма заказа" });

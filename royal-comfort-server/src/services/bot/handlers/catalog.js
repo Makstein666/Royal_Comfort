@@ -4,7 +4,7 @@ const { isAdmin } = require('../utils/constants');
 const { mainMenuAdmin } = require('../keyboards');
 
 const setupCatalogHandlers = (bot) => {
-    bot.hears(/Каталог/i, async (ctx) => {
+    bot.hears(/^(🛍\s*)?Каталог$/i, async (ctx) => {
         if (!isAdmin(ctx)) return;
         await showCatalogMenu(ctx);
     });

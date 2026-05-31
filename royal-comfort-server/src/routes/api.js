@@ -17,6 +17,7 @@ router.get('/catalog/categories/all', catalogController.getAllCategories);
 router.get('/catalog/categories/:id', catalogController.getCategoryWithConfig);
 router.get('/catalog/products', catalogController.getProducts);
 router.get('/catalog/reviews', catalogController.getReviews);
+router.get('/reviews/check-order/:orderId', catalogController.checkOrderForReview);
 router.post('/reviews', catalogController.createReview);
 router.get('/catalog/promo', catalogController.getPromoSettings);
 

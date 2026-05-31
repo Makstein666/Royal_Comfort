@@ -97,7 +97,7 @@ const setupAdminHandlers = (bot) => {
         try {
             const admins = await Admin.findAll();
             
-            let text = '👥 **Управление администраторами**\n\n';
+            let text = '👥 <b>Управление администраторами</b>\n\n';
             const buttons = [];
 
             admins.forEach(admin => {
@@ -114,7 +114,7 @@ const setupAdminHandlers = (bot) => {
             buttons.push([Markup.button.callback('🔙 Назад', 'admin_menu')]);
 
             await ctx.editMessageText(text, {
-                parse_mode: 'Markdown',
+                parse_mode: 'HTML',
                 reply_markup: Markup.inlineKeyboard(buttons).reply_markup
             });
         } catch (error) {
@@ -143,7 +143,7 @@ const setupAdminHandlers = (bot) => {
             ctx.answerCbQuery('✅ Админ удален');
             // Перезагружаем список
             const admins = await Admin.findAll();
-            let text = '👥 **Управление администраторами**\n\n';
+            let text = '👥 <b>Управление администраторами</b>\n\n';
             const buttons = [];
             admins.forEach(a => {
                 const isSuper = a.role === 'superadmin';
@@ -156,7 +156,7 @@ const setupAdminHandlers = (bot) => {
             buttons.push([Markup.button.callback('🔙 Назад', 'admin_menu')]);
 
             await ctx.editMessageText(text, {
-                parse_mode: 'Markdown',
+                parse_mode: 'HTML',
                 reply_markup: Markup.inlineKeyboard(buttons).reply_markup
             });
         } catch (err) {

@@ -1,5 +1,5 @@
 // Адрес твоего сервера
-const API_URL = 'http://localhost:5000/api';
+const API_URL = '/api';
 
 // 1. Получить все категории
 export const fetchCategories = async () => {

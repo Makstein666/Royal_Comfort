@@ -51,6 +51,7 @@ exports.getCategoryWithConfig = async (req, res) => {
             id: g.id,
             title: g.title,
             description: g.description,
+            type: g.id.endsWith('extras') ? 'multiple' : 'single',
             options: g.options.map(o => ({
                 id: o.id,
                 name: o.name,
@@ -151,30 +152,67 @@ exports.createReview = async (req, res) => {
         }
 
         // Определяем категорию
-        let categoryId = order.productId; // В Order productId может быть ID категории
+        let categoryId = null;
         let productName = order.productName;
 
-        // Если productId указывает на конкретный товар, проверим его категорию
-        // Но обычно в этой системе productId для заказов - это ID категории для индивидуальных 
-        // или ID товара. В Order.js мы видели: productId: id категории или товара
-        
-        // Попробуем найти товар, если это не категория
-        const category = await Category.findByPk(order.productId);
-        if (!category) {
-            // Если это не категория, значит это товар
-            const product = await Product.findByPk(order.productId);
-            if (product) {
-                categoryId = product.categoryId;
+        if (order.productId) {
+            const category = await Category.findByPk(order.productId);
+            if (!category) {
+                const product = await Product.findByPk(order.productId);
+                if (product) {
+                    categoryId = product.categoryId;
+                }
+            } else {
+                categoryId = category.id;
             }
-        } else {
-            categoryId = category.id;
+        }
+
+        // Обработка загруженных картинок (декодирование Base64)
+        const savedImageUrls = [];
+        if (images && Array.isArray(images)) {
+            const fs = require('fs');
+            const path = require('path');
+            
+            for (const imgBase64 of images) {
+                if (typeof imgBase64 === 'string' && imgBase64.startsWith('data:image/')) {
+                    try {
+                        const matches = imgBase64.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+                        if (matches && matches.length === 3) {
+                            const extMap = {
+                                'image/jpeg': '.jpg',
+                                'image/jpg': '.jpg',
+                                'image/png': '.png',
+                                'image/webp': '.webp',
+                                'image/gif': '.gif'
+                            };
+                            const mimeType = matches[1];
+                            const ext = extMap[mimeType] || '.jpg';
+                            const dataBuffer = Buffer.from(matches[2], 'base64');
+
+                            const uniqueFilename = `reviews_${Date.now()}_${Math.floor(Math.random() * 10000)}${ext}`;
+                            const targetDir = path.join(__dirname, '../../public/uploads/reviews');
+                            const targetFilePath = path.join(targetDir, uniqueFilename);
+
+                            fs.mkdirSync(targetDir, { recursive: true });
+                            fs.writeFileSync(targetFilePath, dataBuffer);
+
+                            savedImageUrls.push(`/uploads/reviews/${uniqueFilename}`);
+                        }
+                    } catch (saveErr) {
+                        console.error('Ошибка сохранения Base64 картинки:', saveErr);
+                    }
+                } else if (typeof imgBase64 === 'string') {
+                    // Если это уже путь, сохраняем как есть
+                    savedImageUrls.push(imgBase64);
+                }
+            }
         }
 
         const review = await Review.create({
             author: order.clientName,
             text,
             rating,
-            images: images || [],
+            images: savedImageUrls,
             orderId,
             productName,
             categoryId,
@@ -188,6 +226,38 @@ exports.createReview = async (req, res) => {
         res.status(201).json({ success: true, review });
     } catch (err) {
         console.error('Ошибка createReview:', err);
+        res.status(500).json({ message: 'Ошибка сервера' });
+    }
+};
+
+// GET /api/reviews/check-order/:orderId — проверить заказ перед отзывом и вернуть имя клиента
+exports.checkOrderForReview = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { Order } = require('../models');
+
+        if (!orderId) {
+            return res.status(400).json({ message: 'Номер заказа не указан' });
+        }
+
+        const order = await Order.findByPk(orderId.toUpperCase());
+        if (!order) {
+            return res.status(404).json({ message: 'Заказ с таким номером не найден' });
+        }
+
+        // Проверяем, нет ли уже отзыва
+        const existingReview = await Review.findOne({ where: { orderId: order.id } });
+        if (existingReview) {
+            return res.status(400).json({ message: 'Отзыв по этому заказу уже оставлен' });
+        }
+
+        res.json({
+            success: true,
+            clientName: order.clientName,
+            productName: order.productName
+        });
+    } catch (err) {
+        console.error('Ошибка checkOrderForReview:', err);
         res.status(500).json({ message: 'Ошибка сервера' });
     }
 };
