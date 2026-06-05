@@ -35,7 +35,7 @@ const ProductDetailsModal = ({ isOpen, onClose, product, onOrder }) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center sm:p-4">
         
         {/* 1. ЗАТЕМНЕНИЕ (Кликабельное) */}
         <div 
@@ -48,7 +48,7 @@ const ProductDetailsModal = ({ isOpen, onClose, product, onOrder }) => {
           initial={{ scale: 0.95, opacity: 0 }} 
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
-          className="relative w-full max-w-6xl h-[85vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
+          className="relative w-full max-w-6xl max-h-modal bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
         >
           
           {/* --- ЛЕВАЯ КОЛОНКА (ФОТО) --- */}

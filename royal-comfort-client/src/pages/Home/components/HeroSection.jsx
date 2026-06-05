@@ -11,7 +11,10 @@ const HeroSection = () => {
   const { openModal } = useConfigurator();
 
   return (
-    <section className="relative h-screen w-full overflow-hidden flex items-center justify-center bg-[#0A2A2A]">
+    <section
+      className="relative w-full overflow-hidden flex items-center justify-center bg-[#0A2A2A]"
+      style={{ height: '100svh', minHeight: '500px' }}
+    >
       
       {/* 1. ВИДЕО-ФОН */}
       <div className="absolute inset-0 z-0">

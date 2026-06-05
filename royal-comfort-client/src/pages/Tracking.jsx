@@ -162,7 +162,7 @@ const Tracking = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F1E6] pt-28 pb-12 px-4 md:px-8 flex flex-col md:flex-row gap-8 items-start relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#F5F1E6] pt-28 md:pt-32 pb-12 px-4 md:px-8 flex flex-col md:flex-row gap-8 items-start relative overflow-x-hidden">
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#B88E2F]/5 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
 
       {/* ЛЕВАЯ КОЛОНКА */}

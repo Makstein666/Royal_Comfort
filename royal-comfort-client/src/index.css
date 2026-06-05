@@ -9,31 +9,66 @@ html, body {
   width: 100%;
 }
 
+/* Safe area support for Telegram in-app browser and notched devices */
+html {
+  /* Используем env() для учёта челки и нижней панели браузера */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
 #root {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  /* Используем svh как более надёжный fallback для Telegram WebView */
+  min-height: 100svh;
 }
 
 body {
-  /* Фон страницы: очень светлый, с едва заметным оттенком зеленого/серого */
-  background-color: #f8fafc; 
-  color: #022c22; /* Текст темно-изумрудный, почти черный */
+  background-color: #f8fafc;
+  color: #022c22;
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
+  /* Запрещаем горизонтальный скролл */
+  overflow-x: hidden;
 }
 
-/* Скроллбар в стиле Royal */
-::-webkit-scrollbar {
-  width: 8px;
+/* Блокировка скролла фона при открытой модалке */
+body.modal-open {
+  overflow: hidden;
+  /* Компенсируем сдвиг контента при скрытии скроллбара */
+  padding-right: var(--scrollbar-width, 0px);
 }
-::-webkit-scrollbar-track {
-  background: #022c22;
+
+/* ─── Скроллбар ─── */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #022c22; }
+::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #b4942b; }
+
+/* ─── Утилиты для модальных окон ─── */
+/* dvh с fallback на vh для Telegram WebView */
+.max-h-modal {
+  max-height: 90vh;
+  max-height: 90dvh;
 }
-::-webkit-scrollbar-thumb {
-  background: #d4af37; /* Золотой бегунок */
-  border-radius: 4px;
+
+.max-h-modal-sm {
+  max-height: 95vh;
+  max-height: 95svh;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #b4942b;
+
+/* Обеспечиваем правильный overscroll в iOS Safari / Telegram */
+.modal-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  overflow-y: auto;
+}
+
+/* Запрет выделения текста на кнопках */
+button {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }

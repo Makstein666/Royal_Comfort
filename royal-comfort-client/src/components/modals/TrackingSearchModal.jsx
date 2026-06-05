@@ -104,7 +104,7 @@ const TrackingSearchModal = ({ isOpen, onClose }) => {
   return (
     <>
     <AnimatePresence>
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center sm:p-4">
             <motion.div 
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 onClick={onClose}
@@ -112,8 +112,9 @@ const TrackingSearchModal = ({ isOpen, onClose }) => {
             />
             
             <motion.div 
-                initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-                className="relative w-full max-w-md bg-white rounded-3xl p-6 md:p-8 shadow-2xl overflow-hidden"
+                initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }}
+                transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+                className="relative w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-6 md:p-8 shadow-2xl max-h-modal flex flex-col overflow-y-auto modal-scroll"
             >
                 <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors z-10">
                     <X size={20} />

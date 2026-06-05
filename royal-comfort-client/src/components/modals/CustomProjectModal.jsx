@@ -33,13 +33,19 @@ const CustomProjectModal = ({ isOpen, onClose, categoryName = null }) => {
 
   useEffect(() => {
     if (isOpen) {
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
+      document.body.classList.add('modal-open');
       setStatus('idle');
       setTouched(false);
       setErrors({});
       setPreviews([]);
       setConsent(false);
       setForm({ name: '', phone: '+7', description: '', time: 'asap', files: [] });
+    } else {
+      document.body.classList.remove('modal-open');
     }
+    return () => document.body.classList.remove('modal-open');
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -168,7 +174,7 @@ const CustomProjectModal = ({ isOpen, onClose, categoryName = null }) => {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.92, opacity: 0, y: 24 }}
           transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-          className="relative w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col bg-[#FDFBF7] rounded-3xl shadow-2xl border border-[#B88E2F]/20"
+          className="relative w-full max-w-2xl max-h-modal overflow-hidden flex flex-col bg-[#FDFBF7] rounded-t-3xl sm:rounded-3xl shadow-2xl border border-[#B88E2F]/20"
         >
           <div className="h-1.5 w-full shrink-0 bg-gradient-to-r from-[#0A2A2A] via-[#B88E2F] to-[#0A2A2A]" />
           <button

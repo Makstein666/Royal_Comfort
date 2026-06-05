@@ -104,7 +104,7 @@ const ReferralModal = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -117,7 +117,7 @@ const ReferralModal = () => {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-md bg-white rounded-3xl overflow-hidden shadow-2xl z-10"
+          className="relative w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl z-10 flex flex-col max-h-modal"
         >
           {/* Header */}
           <div className="bg-[#0A2A2A] p-6 text-white text-center relative">
@@ -150,7 +150,7 @@ const ReferralModal = () => {
             </button>
           </div>
 
-          <div className="p-6">
+          <div className="p-6 modal-scroll flex-1">
             {mode === 'invite' && (
               <div className="space-y-4">
                 {!generatedCode ? (

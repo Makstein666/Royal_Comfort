@@ -169,7 +169,7 @@ const ReviewModal = ({ isOpen, onClose, prefilledOrderId = '' }) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center sm:p-4">
         <motion.div 
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           onClick={onClose}
@@ -177,10 +177,17 @@ const ReviewModal = ({ isOpen, onClose, prefilledOrderId = '' }) => {
         />
 
         <motion.div 
-          initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-          className="relative w-full max-w-md bg-[#FDFBF7] rounded-3xl shadow-2xl p-8 border border-[#B88E2F]/20"
+          initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }}
+          transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+          className="relative w-full sm:max-w-md bg-[#FDFBF7] rounded-t-3xl sm:rounded-3xl shadow-2xl border border-[#B88E2F]/20 flex flex-col overflow-hidden max-h-modal"
         >
-          <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-[#B88E2F]"><X /></button>
+          {/* Индикатор свайпа */}
+          <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+            <div className="w-10 h-1 bg-gray-300 rounded-full" />
+          </div>
+          <button onClick={onClose} aria-label="Закрыть" className="absolute top-4 right-4 text-gray-400 hover:text-[#B88E2F] p-2 rounded-full hover:bg-[#B88E2F]/10 z-20 touch-manipulation"><X /></button>
+          <div className="modal-scroll flex-1">
+          <div className="p-6 sm:p-8">
 
           {status === 'success' ? (
               <div className="text-center py-10">
@@ -325,6 +332,8 @@ const ReviewModal = ({ isOpen, onClose, prefilledOrderId = '' }) => {
                   )}
               </form>
           )}
+          </div>
+          </div>
         </motion.div>
       </div>
     </AnimatePresence>

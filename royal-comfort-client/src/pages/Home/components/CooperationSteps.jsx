@@ -88,7 +88,7 @@ const CooperationSteps = () => {
                 {step.title}
               </h3>
               
-              <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
+              <p className="text-gray-400 text-sm leading-relaxed max-w-xs pr-16 md:pr-0">
                 {step.desc}
               </p>
             </motion.div>

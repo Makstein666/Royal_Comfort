@@ -142,7 +142,7 @@ const Catalog = () => {
   const currentCategoryObj = categories.find(c => c.id === currentCategoryId);
 
   return (
-    <div className="min-h-screen bg-[#F5F1E6] pt-28 pb-20 text-royal-950">
+    <div className="min-h-screen bg-[#F5F1E6] pt-28 md:pt-32 pb-20 text-royal-950">
       <div className="w-full px-4 md:px-8 mb-12">
         
         {/* HERO БЛОК */}
